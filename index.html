@@ -3,15 +3,17 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Centered Logo</title>
+<title>Centered Logo with Links</title>
 <style>
 html, body {
 height: 100%;
 margin: 0;
 display: flex;
+flex-direction: column;
 align-items: center;
 justify-content: center;
-background-color: #7fc1bb; /* background similar to logo color */
+background-color: #7fc1bb;
+font-family: Arial, sans-serif;
 }
 img {
 width: min(40vw, 400px);
@@ -19,10 +21,32 @@ height: auto;
 display: block;
 border-radius: 10px;
 box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+margin-bottom: 30px;
+}
+.links {
+display: flex;
+gap: 20px;
+}
+.links a {
+text-decoration: none;
+background: #ffffff;
+color: #333;
+padding: 12px 20px;
+border-radius: 8px;
+font-weight: bold;
+box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+transition: background 0.3s;
+}
+.links a:hover {
+background: #e0f2f1;
 }
 </style>
 </head>
 <body>
 <img src="FB logo.png" alt="Company Logo" />
+<div class="links">
+<a href="https://chrimpen.github.io/PPF/" target="_blank" rel="noopener noreferrer">Open PPF</a>
+<a href="https://chrimpen.github.io/Supply-Demand/" target="_blank" rel="noopener noreferrer">Open Supply & Demand</a>
+</div>
 </body>
 </html>
