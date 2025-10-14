@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Logo + Links</title>
+<title>Α.Ο.Θ. 4 U</title>
 <style>
 :root {
 --bg: #7fc1bb; /* page background */
@@ -24,10 +24,17 @@ grid-template-rows: auto 1fr auto;
 
 
 header {
+position: sticky; /* NEW: stays visible */
+top: 0; /* NEW */
+z-index: 1000; /* NEW: on top of content */
 display: flex;
 align-items: center;
-justify-content: space-between;
+justify-content: space-between; /* logo left, buttons right */
 padding: clamp(12px, 3vw, 20px);
+background: rgba(127, 193, 187, 0.9); /* subtle backdrop so text stays readable */
+-webkit-backdrop-filter: saturate(140%) blur(6px);
+backdrop-filter: saturate(140%) blur(6px);
+box-shadow: 0 2px 8px rgba(0,0,0,.12);
 }
 .logo {
 display: block;
@@ -36,56 +43,29 @@ height: auto;
 border-radius: 10px;
 box-shadow: 0 6px 16px rgba(0,0,0,.12);
 }
-
-
-.header-buttons {
-display: flex;
-gap: 12px;
-}
-
-
-.header-buttons a {
-text-decoration: none;
-padding: 10px 16px;
-background: var(--rose);
-color: var(--text-on-rose);
-font-weight: 600;
-border-radius: 8px;
-box-shadow: 0 4px 12px rgba(244, 63, 94, .25);
-transition: background 0.3s;
-}
-.header-buttons a:hover {
-background: var(--rose-600);
-}
+.header-buttons { display: flex; gap: 12px; }
 
 
 main {
 display: grid;
-place-items: start center;
+place-items: start center; /* stack vertically, center horizontally */
+gap: 28px;
 padding: clamp(16px, 4vw, 32px);
-gap: 40px;
 }
 
 
+/* Content containers (one under the other) */
 .container {
 width: min(800px, 92vw);
-background: rgba(255, 255, 255, 0.2);
+background: rgba(255,255,255,0.2);
 padding: 24px;
 border-radius: 16px;
-box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+box-shadow: 0 6px 18px rgba(0,0,0,0.15);
 }
+.container h2 { margin-top: 0; color: #fff; }
 
 
-.container h2 {
-margin-top: 0;
-color: #fff;
-}
-
-
+/* Existing links layout preserved */
 .links {
 width: min(680px, 92vw);
-display: grid;
-gap: 14px;
-grid-template-columns: 1fr;
-}
 </html>
