@@ -3,50 +3,100 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Aoth 4 U</title>
+<title>Logo + Links</title>
 <style>
-html, body {
-height: 100%;
+:root {
+--bg: #7fc1bb; /* page background */
+--rose: #f43f5e; /* rose pink base */
+--rose-600: #e11d48; /* hover/active */
+--text-on-rose: #fff; /* button text */
+}
+
+
+/* Layout */
+html, body { height: 100%; }
+body {
 margin: 0;
+background: var(--bg);
+font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+display: grid;
+grid-template-rows: auto 1fr;
+}
+
+
+/* Header with top-left logo */
+header {
 display: flex;
-flex-direction: column;
+align-items: center;
+padding: clamp(12px, 3vw, 20px);
+}
+.logo {
+display: block;
+width: clamp(56px, 14vw, 120px);
+height: auto;
+border-radius: 10px;
+box-shadow: 0 6px 16px rgba(0,0,0,.12);
+}
+
+
+/* Main content */
+main {
+display: grid;
+place-items: center;
+padding: clamp(16px, 4vw, 32px);
+}
+
+
+.links {
+width: min(680px, 92vw);
+display: grid;
+gap: 14px;
+grid-template-columns: 1fr; /* stack on mobile */
+}
+
+
+/* At 640px+, put buttons side by side */
+@media (min-width: 640px) {
+.links { grid-template-columns: 1fr 1fr; }
+}
+
+
+a.btn {
+display: inline-flex;
 align-items: center;
 justify-content: center;
-background-color: #7fc1bb;
-font-family: Arial, sans-serif;
-}
-img {
-width: min(40vw, 400px);
-height: auto;
-display: block;
-border-radius: 10px;
-box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-margin-bottom: 30px;
-}
-.links {
-display: flex;
-gap: 20px;
-}
-.links a {
 text-decoration: none;
-background: #ffffff;
-color: #333;
-padding: 12px 20px;
-border-radius: 8px;
-font-weight: bold;
-box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-transition: background 0.3s;
+padding: 14px 18px; /* big touch target */
+border-radius: 12px;
+background: var(--rose);
+color: var(--text-on-rose);
+font-weight: 700;
+letter-spacing: .2px;
+box-shadow: 0 6px 18px rgba(244, 63, 94, .25);
+transition: transform .06s ease, background .2s ease, box-shadow .2s ease;
 }
-.links a:hover {
-background: #e0f2f1;
+a.btn:hover { background: var(--rose-600); }
+a.btn:active { transform: translateY(1px); box-shadow: 0 4px 12px rgba(244,63,94,.28); }
+
+
+/* Reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+a.btn { transition: background .2s ease; }
+a.btn:active { transform: none; }
 }
 </style>
 </head>
 <body>
-<img src="FB logo.png" alt="Company Logo" />
+<header>
+<img src="FB logo.png" alt="Company Logo" class="logo" />
+</header>
+
+
+<main>
 <div class="links">
-<a href="https://chrimpen.github.io/PPF/" target="_blank" rel="noopener noreferrer">Open PPF</a>
-<a href="https://chrimpen.github.io/Supply-Demand/" target="_blank" rel="noopener noreferrer">Open Supply & Demand</a>
+<a class="btn" href="https://chrimpen.github.io/PPF/" target="_blank" rel="noopener noreferrer">Open PPF</a>
+<a class="btn" href="https://chrimpen.github.io/Supply-Demand/" target="_blank" rel="noopener noreferrer">Open Supply &amp; Demand</a>
 </div>
+</main>
 </body>
 </html>
