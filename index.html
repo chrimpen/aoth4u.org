@@ -6,66 +6,179 @@
 <title>Α.Ο.Θ. 4 U</title>
 <style>
 :root {
---bg: #7fc1bb; /* page background */
---rose: #f43f5e; /* rose pink base */
---rose-600: #e11d48; /* hover/active */
---text-on-rose: #fff; /* button text */
+  --bg: #7fc1bb; /* page background */
+  --rose: #f43f5e; /* rose pink base */
+  --rose-600: #e11d48; /* hover/active */
+  --text-on-rose: #fff; /* button text */
 }
-
 
 html, body { height: 100%; scroll-behavior: smooth; }
 body {
-margin: 0;
-background: var(--bg);
-font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-display: grid;
-grid-template-rows: auto 1fr auto;
+  margin: 0;
+  background: var(--bg);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
 }
-
 
 header {
-position: sticky; /* NEW: stays visible */
-top: 0; /* NEW */
-z-index: 1000; /* NEW: on top of content */
-display: flex;
-align-items: center;
-justify-content: space-between; /* logo left, buttons right */
-padding: clamp(12px, 3vw, 20px);
-background: rgba(127, 193, 187, 0.9); /* subtle backdrop so text stays readable */
--webkit-backdrop-filter: saturate(140%) blur(6px);
-backdrop-filter: saturate(140%) blur(6px);
-box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  position: sticky; /* NEW: stays visible */
+  top: 0;           /* NEW */
+  z-index: 1000;    /* NEW: on top of content */
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* logo left, buttons right */
+  padding: clamp(12px, 3vw, 20px);
+  background: rgba(127, 193, 187, 0.9); /* subtle backdrop so text stays readable */
+  -webkit-backdrop-filter: saturate(140%) blur(6px);
+  backdrop-filter: saturate(140%) blur(6px);
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
 }
 .logo {
-display: block;
-width: clamp(56px, 14vw, 120px);
-height: auto;
-border-radius: 10px;
-box-shadow: 0 6px 16px rgba(0,0,0,.12);
+  display: block;
+  width: clamp(56px, 14vw, 120px);
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.12);
 }
 .header-buttons { display: flex; gap: 12px; }
 
-
 main {
-display: grid;
-place-items: start center; /* stack vertically, center horizontally */
-gap: 28px;
-padding: clamp(16px, 4vw, 32px);
+  display: grid;
+  place-items: start center; /* stack vertically, center horizontally */
+  gap: 28px;
+  padding: clamp(16px, 4vw, 32px);
 }
-
 
 /* Content containers (one under the other) */
 .container {
-width: min(800px, 92vw);
-background: rgba(255,255,255,0.2);
-padding: 24px;
-border-radius: 16px;
-box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  width: min(800px, 92vw);
+  background: rgba(255,255,255,0.2);
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
 }
 .container h2 { margin-top: 0; color: #fff; }
 
-
 /* Existing links layout preserved */
 .links {
-width: min(680px, 92vw);
+  width: min(680px, 92vw);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .links { grid-template-columns: 1fr 1fr; }
+}
+
+/* NEW: 5x5 grid for PDFs */
+.pdf-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+/* Make it friendlier on narrow screens without changing desktop 5x5 */
+@media (max-width: 700px) {
+  .pdf-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 701px) and (max-width: 999px) {
+  .pdf-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Rose button style (reused for header + main + footer) */
+a.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: var(--rose);
+  color: var(--text-on-rose);
+  font-weight: 700;
+  letter-spacing: .2px;
+  box-shadow: 0 6px 18px rgba(244, 63, 94, .25);
+  transition: transform .06s ease, background .2s ease, box-shadow .2s ease;
+}
+a.btn:hover { background: var(--rose-600); }
+a.btn:active { transform: translateY(1px); box-shadow: 0 4px 12px rgba(244,63,94,.28); }
+
+@media (prefers-reduced-motion: reduce) {
+  a.btn { transition: background .2s ease; }
+  a.btn:active { transform: none; }
+}
+
+footer {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  justify-content: center;
+  background: rgba(0,0,0,0.05);
+}
+@media (min-width: 640px) {
+  footer { grid-template-columns: repeat(5, auto); }
+}
+</style>
+</head>
+<body>
+  <header>
+    <img src="FB logo.png" alt="Company Logo" class="logo" />
+    <!-- Two buttons on the top-right leading to each container -->
+    <nav class="header-buttons" aria-label="Γρήγορη πλοήγηση">
+      <a class="btn" href="#apps">Διαδραστικές εφαρμογές</a>
+      <a class="btn" href="#kef1">Παλιά θέματα πανελληνίων Κεφάλαιο 1^ο</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 1) Διαδραστικές εφαρμογές -->
+    <section id="apps" class="container">
+      <h2>Διαδραστικές εφαρμογές</h2>
+      <div class="links">
+        <a class="btn" href="https://chrimpen.github.io/PPF/" target="_blank" rel="noopener noreferrer">K.E. και Κ.Π.Δ.</a>
+        <a class="btn" href="https://chrimpen.github.io/Supply-Demand/" target="_blank" rel="noopener noreferrer">Αγορά: Προσφορά &amp; Ζήτηση</a>
+      </div>
+    </section>
+
+    <!-- 2) Παλιά θέματα πανελληνίων Κεφάλαιο 1^ο -->
+    <section id="kef1" class="container">
+      <h2>Παλιά θέματα πανελληνίων Κεφάλαιο 1^ο</h2>
+      <div class="pdf-grid">
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 1</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 2</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 3</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 4</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 5</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 6</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 7</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 8</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 9</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 10</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 11</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 12</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 13</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 14</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 15</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 16</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 17</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 18</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 19</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 20</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 21</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 22</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 23</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 24</a>
+        <a class="btn" href="#" target="_blank" rel="noopener noreferrer">PDF 25</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <a class="btn" href="mailto:chrimpen@hotmail.gr" target="chrimpen@hotmail.gr" rel="noopener noreferrer">Mail</a>
+    <a class="btn" href="https://forms.gle/qL8Cju8iMPPZdKMw7" target="https://forms.gle/qL8Cju8iMPPZdKMw7" rel="noopener noreferrer">Φόρμα επικοινωνίας</a>
+    <a class="btn" href="https://open.spotify.com/show/4T8pEDLtQePgjHe7SmZj7f?si=zpAtk0IxRkCKObk26T5Cxg" target="https://open.spotify.com/show/4T8pEDLtQePgjHe7SmZj7f?si=zpAtk0IxRkCKObk26T5Cxg" rel="noopener noreferrer">Spotify</a>
+    <a class="btn" href="https://www.instagram.com/ao8_4_u?igsh=d2hmcXhwaWxpc2ti&utm_source=qr" target="https://www.instagram.com/ao8_4_u?igsh=d2hmcXhwaWxpc2ti&utm_source=qr" rel="noopener noreferrer">Instagram</a>
+    <a class="btn" href="https://www.tiktok.com/@aoth4u?_t=ZN-90XeXjZNrwU&_r=1" target="https://www.tiktok.com/@aoth4u?_t=ZN-90XeXjZNrwU&_r=1" rel="noopener noreferrer">TikTok</a>
+  </footer>
+</body>
 </html>
