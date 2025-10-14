@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Α.Ο.Θ. 4 U</title>
+<title>Logo + Links</title>
 <style>
 :root {
 --bg: #7fc1bb; /* page background */
@@ -13,7 +13,7 @@
 }
 
 
-html, body { height: 100%; }
+html, body { height: 100%; scroll-behavior: smooth; }
 body {
 margin: 0;
 background: var(--bg);
@@ -26,6 +26,7 @@ grid-template-rows: auto 1fr auto;
 header {
 display: flex;
 align-items: center;
+justify-content: space-between;
 padding: clamp(12px, 3vw, 20px);
 }
 .logo {
@@ -37,10 +38,47 @@ box-shadow: 0 6px 16px rgba(0,0,0,.12);
 }
 
 
+.header-buttons {
+display: flex;
+gap: 12px;
+}
+
+
+.header-buttons a {
+text-decoration: none;
+padding: 10px 16px;
+background: var(--rose);
+color: var(--text-on-rose);
+font-weight: 600;
+border-radius: 8px;
+box-shadow: 0 4px 12px rgba(244, 63, 94, .25);
+transition: background 0.3s;
+}
+.header-buttons a:hover {
+background: var(--rose-600);
+}
+
+
 main {
 display: grid;
-place-items: center;
+place-items: start center;
 padding: clamp(16px, 4vw, 32px);
+gap: 40px;
+}
+
+
+.container {
+width: min(800px, 92vw);
+background: rgba(255, 255, 255, 0.2);
+padding: 24px;
+border-radius: 16px;
+box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+
+.container h2 {
+margin-top: 0;
+color: #fff;
 }
 
 
@@ -50,67 +88,4 @@ display: grid;
 gap: 14px;
 grid-template-columns: 1fr;
 }
-@media (min-width: 640px) {
-.links { grid-template-columns: 1fr 1fr; }
-}
-
-
-a.btn {
-display: inline-flex;
-align-items: center;
-justify-content: center;
-text-decoration: none;
-padding: 14px 18px;
-border-radius: 12px;
-background: var(--rose);
-color: var(--text-on-rose);
-font-weight: 700;
-letter-spacing: .2px;
-box-shadow: 0 6px 18px rgba(244, 63, 94, .25);
-transition: transform .06s ease, background .2s ease, box-shadow .2s ease;
-}
-a.btn:hover { background: var(--rose-600); }
-a.btn:active { transform: translateY(1px); box-shadow: 0 4px 12px rgba(244,63,94,.28); }
-
-
-@media (prefers-reduced-motion: reduce) {
-a.btn { transition: background .2s ease; }
-a.btn:active { transform: none; }
-}
-
-
-footer {
-display: grid;
-gap: 14px;
-padding: 20px;
-justify-content: center;
-background: rgba(0,0,0,0.05);
-}
-@media (min-width: 640px) {
-footer { grid-template-columns: repeat(5, auto); }
-}
-</style>
-</head>
-<body>
-<header>
-<img src="FB logo.png" alt="Company Logo" class="logo" />
-</header>
-
-
-<main>
-<div class="links">
-<a class="btn" href="https://chrimpen.github.io/PPF/" target="_blank" rel="noopener noreferrer">K.E. και Κ.Π.Δ.</a>
-<a class="btn" href="https://chrimpen.github.io/Supply-Demand/" target="_blank" rel="noopener noreferrer">Αγορά: Προσφορά &amp; Ζήτηση</a>
-</div>
-</main>
-
-
-<footer>
-<a class="btn" href="mailto:chrimpen@hotmail.gr" target="chrimpen@hotmail.gr" rel="noopener noreferrer">Mail</a>
-<a class="btn" href="https://forms.gle/qL8Cju8iMPPZdKMw7" target="https://forms.gle/qL8Cju8iMPPZdKMw7" rel="noopener noreferrer">Φόρμα επικοινωνίας</a>
-<a class="btn" href="https://open.spotify.com/show/4T8pEDLtQePgjHe7SmZj7f?si=zpAtk0IxRkCKObk26T5Cxg" target="https://open.spotify.com/show/4T8pEDLtQePgjHe7SmZj7f?si=zpAtk0IxRkCKObk26T5Cxg" rel="noopener noreferrer">Spotify</a>
-<a class="btn" href="https://www.instagram.com/ao8_4_u?igsh=d2hmcXhwaWxpc2ti&utm_source=qr" target="https://www.instagram.com/ao8_4_u?igsh=d2hmcXhwaWxpc2ti&utm_source=qr" rel="noopener noreferrer">Instagram</a>
-<a class="btn" href="https://www.tiktok.com/@aoth4u?_t=ZN-90XeXjZNrwU&_r=1" target="https://www.tiktok.com/@aoth4u?_t=ZN-90XeXjZNrwU&_r=1" rel="noopener noreferrer">TikTok</a>
-</footer>
-</body>
 </html>
