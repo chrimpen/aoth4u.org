@@ -125,45 +125,23 @@ footer {
     <img src="FB logo.png" alt="Company Logo" class="logo" />
     <!-- Two buttons on the top-right leading to each container -->
     <nav class="header-buttons" aria-label="Γρήγορη πλοήγηση">
-    <a class="btn" href="#apps">Διαδραστικές εφαρμογές</a>
+      <a class="btn" href="#apps">Διαδραστικές εφαρμογές</a>
 
-    <!-- Dropdown menu -->
-    <div class="menu" role="none">
-      <button class="btn" id="topicsBtn" aria-haspopup="true" aria-expanded="false" aria-controls="topicsMenu">
-        Θέματα Πανελληνίων
-        <span class="chev" aria-hidden="true"></span>
-      </button>
+      <div class="menu">
+        <button class="btn" id="topicsBtn" aria-haspopup="true" aria-expanded="false">
+          Θέματα Πανελληνίων <span class="chev" aria-hidden="true"></span>
+        </button>
 
-      <div class="dropdown rose" id="topicsMenu" role="menu" aria-label="Θέματα Πανελληνίων">
-        <a class="dd-item" role="menuitem" href="#GELtasks">
-          <span class="dd-title">Γ.Ε.Λ. Θέματα Πανελληνίων</span>
-          <small class="dd-desc">Όλα τα έτη, βασική σειρά θεμάτων Γενικού Λυκείου.</small>
-        </a>
-
-        <a class="dd-item" role="menuitem" href="#EPALtasks">
-          <span class="dd-title">ΕΠΑ.Λ. Θέματα Πανελληνίων</span>
-          <small class="dd-desc">Θέματα Επαγγελματικού Λυκείου, παλαιό & νέο σύστημα.</small>
-        </a>
-
-        <a class="dd-item" role="menuitem" href="#GELEPANtasks">
-          <span class="dd-title">Γ.Ε.Λ. Επαν. Θέματα</span>
-          <small class="dd-desc">Επαναληπτικές εξετάσεις ΓΕΛ, ομαδοποιημένες ανά έτος.</small>
-        </a>
-
-        <a class="dd-item" role="menuitem" href="#EPALEPANtasks">
-          <span class="dd-title">ΕΠΑ.Λ. Επαν. Θέματα</span>
-          <small class="dd-desc">Επαναληπτικές ΕΠΑΛ με κατηγοριοποίηση ανά θεματική.</small>
-        </a>
-
-        <a class="dd-item" role="menuitem" href="#OMOGENEIStasks">
-          <span class="dd-title">Ομογενείς Θέματα</span>
-          <small class="dd-desc">Θέματα για Ομογενείς & Εξωτερικού, αναλυτικές ενότητες.</small>
-        </a>
+        <div class="dropdown rose" id="topicsMenu" role="menu">
+          <a class="dd-item" href="#GELtasks"><span class="dd-title">Γ.Ε.Λ. Θέματα Πανελληνίων</span><small class="dd-desc">Όλα τα έτη.</small></a>
+          <a class="dd-item" href="#EPALtasks"><span class="dd-title">ΕΠΑ.Λ. Θέματα Πανελληνίων</span><small class="dd-desc">Παλαιό & νέο σύστημα.</small></a>
+          <a class="dd-item" href="#GELEPANtasks"><span class="dd-title">Γ.Ε.Λ. Επαν. Θέματα</span><small class="dd-desc">Επαναληπτικές εξετάσεις.</small></a>
+          <a class="dd-item" href="#EPALEPANtasks"><span class="dd-title">ΕΠΑ.Λ. Επαν. Θέματα</span><small class="dd-desc">Με κατηγοριοποίηση.</small></a>
+          <a class="dd-item" href="#OMOGENEIStasks"><span class="dd-title">Ομογενείς Θέματα</span><small class="dd-desc">Θέματα Εξωτερικού.</small></a>
+        </div>
       </div>
-    </div>
     </nav>
   </header>
-
   
   <main>
     <!-- 1) Διαδραστικές εφαρμογές -->
