@@ -1,184 +1,133 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="el">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Α.Ο.Θ. 4 U</title>
 <style>
-:root {
-  --bg: #7fc1bb; /* page background */
-  --rose: #f43f5e; /* rose pink base */
-  --rose-600: #e11d48; /* hover/active */
-  --text-on-rose: #fff; /* button text */
+:root{
+  --bg:#7fc1bb;
+  --amber: rgba(255,193,7,0.9);
+  --rose:#f43f5e;
+  --rose-600:#e11d48;
+  --text-on-rose:#fff;
   --header-offset:96px; /* θα προσαρμοστεί δυναμικά με JS */
 }
 
 /* Native anchor offset */
 html{scroll-behavior:smooth; scroll-padding-top:var(--header-offset);}
 section{scroll-margin-top:var(--header-offset);}
-  
-html, body { height: 100%; scroll-behavior: smooth; }
-body {
-  margin: 0;
-  background: var(--bg);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
 }
 
-header {
-  position: sticky; /* stays visible */
-  top: 0;
-  z-index: 1000; /* on top of content */
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* logo left, buttons right */
-  padding: clamp(12px, 3vw, 20px);
-  background: rgba(255, 193, 7, 0.9); /* amber */
-  -webkit-backdrop-filter: saturate(140%) blur(6px);
-  backdrop-filter: saturate(140%) blur(6px);
-  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+/* Sticky header */
+header{
+  position:sticky; top:0; z-index:1000;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:clamp(12px,3vw,20px);
+  background:var(--amber);
+  -webkit-backdrop-filter:saturate(140%) blur(6px);
+  backdrop-filter:saturate(140%) blur(6px);
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
 }
-.logo {
-  display: block;
-  width: clamp(56px, 14vw, 120px);
-  height: auto;
-  border-radius: 10px;
-  box-shadow: 0 6px 16px rgba(0,0,0,.12);
+.logo{
+  display:block; width:clamp(56px,14vw,120px); height:auto;
+  border-radius:10px; box-shadow:0 6px 16px rgba(0,0,0,.12);
 }
-.header-buttons { display: flex; gap: 12px; }
+.header-buttons{display:flex; gap:12px; flex-wrap:wrap;}
 
-main {
-  display: grid;
-  place-items: start center; /* stack vertically, center horizontally */
-  gap: 28px;
-  padding: clamp(16px, 4vw, 32px);
+main{
+  display:grid; place-items:start center;
+  gap:28px; padding:clamp(16px,4vw,32px);
 }
 
-/* Content containers (one under the other) */
-.container {
-  width: min(800px, 92vw);
-  background: rgba(255,255,255,0.2);
-  padding: 24px;
-  border-radius: 16px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+/* Content cards */
+.container{
+  width:min(800px,92vw);
+  background:rgba(255,255,255,.2);
+  padding:24px; border-radius:16px;
+  box-shadow:0 6px 18px rgba(0,0,0,.15);
 }
-.container h2 { margin-top: 0; color: #fff; }
+.container h2{margin:0 0 12px; color:#fff}
 
-/* Existing links layout preserved */
-.links {
-  width: min(680px, 92vw);
-  display: grid;
-  gap: 14px;
-  grid-template-columns: 1fr;
-}
-@media (min-width: 640px) {
-  .links { grid-template-columns: 1fr 1fr; }
-}
+/* Links grid */
+.links{width:min(680px,92vw); display:grid; gap:14px; grid-template-columns:1fr;}
+@media (min-width:640px){.links{grid-template-columns:1fr 1fr;}}
 
-/* 5x5 grid for PDFs (responsive) */
-.pdf-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-}
-@media (max-width: 700px) {
-  .pdf-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (min-width: 701px) and (max-width: 999px) {
-  .pdf-grid { grid-template-columns: repeat(3, 1fr); }
-}
+/* 5x5 responsive grid */
+.pdf-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:12px;}
+@media (max-width:700px){.pdf-grid{grid-template-columns:repeat(2,1fr);}}
+@media (min-width:701px) and (max-width:999px){.pdf-grid{grid-template-columns:repeat(3,1fr);}}
 
-/* Rose button style (reused) */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  padding: 14px 18px;
-  border-radius: 12px;
-  background: var(--rose);
-  color: var(--text-on-rose);
-  font-weight: 700;
-  letter-spacing: .2px;
-  box-shadow: 0 6px 18px rgba(244, 63, 94, .25);
-  transition: transform .06s ease, background .2s ease, box-shadow .2s ease;
+/* Buttons — apply to both <a> and <button> */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  text-decoration:none; padding:14px 18px; border:0; border-radius:12px;
+  background:var(--rose); color:var(--text-on-rose);
+  font-weight:700; letter-spacing:.2px; cursor:pointer;
+  box-shadow:0 6px 18px rgba(244,63,94,.25);
+  transition:transform .06s ease, background .2s ease, box-shadow .2s ease;
 }
-.btn:hover { background: var(--rose-600); }
-.btn:active { transform: translateY(1px); box-shadow: 0 4px 12px rgba(244,63,94,.28); }
-
-@media (prefers-reduced-motion: reduce) {
-  a.btn { transition: background .2s ease; }
-  a.btn:active { transform: none; }
+.btn:hover{background:var(--rose-600);}
+.btn:active{transform:translateY(1px); box-shadow:0 4px 12px rgba(244,63,94,.28);}
+@media (prefers-reduced-motion:reduce){
+  .btn{transition:background .2s ease;}
+  .btn:active{transform:none;}
 }
 
-footer {
-  display: grid;
-  gap: 14px;
-  padding: 20px;
-  justify-content: center;
-  background: rgba(0,0,0,0.05);
+/* Footer */
+footer{
+  display:grid; gap:14px; padding:20px; justify-content:center;
+  background:rgba(0,0,0,.05);
 }
-@media (min-width: 640px) {
-  footer { grid-template-columns: repeat(5, auto); }
-}
+@media (min-width:640px){footer{grid-template-columns:repeat(5,auto);}}
 
-/* ====== NEW: dropdown bits (minimal additions) ====== */
-.menu { position: relative; }
-
-/* chevron arrow */
-.chev {
-  width: 10px; height: 10px; margin-left: 8px;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: rotate(45deg);
-  transition: transform .2s ease;
-  opacity: .9;
+/* Dropdown */
+.menu{position:relative;}
+.chev{
+  width:10px; height:10px; margin-left:8px;
+  border-right:2px solid currentColor; border-bottom:2px solid currentColor;
+  transform:rotate(45deg); transition:transform .2s ease; opacity:.9;
 }
-#topicsBtn[aria-expanded="true"] .chev { transform: rotate(225deg); }
+button[aria-expanded="true"] .chev{transform:rotate(225deg);}
 
-/* dropdown panel (same rose bg as buttons) */
-.dropdown.rose {
-  position: absolute; right: 0; top: calc(100% + 8px);
-  min-width: 260px;
-  background: var(--rose);
-  color: var(--text-on-rose);
-  border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0,0,0,.25);
-  padding: 8px;
-  display: none;
-  z-index: 1001;
+.dropdown.rose{
+  position:absolute; right:0; top:calc(100% + 8px);
+  min-width:260px; background:var(--rose); color:var(--text-on-rose);
+  border-radius:12px; box-shadow:0 20px 40px rgba(0,0,0,.25);
+  padding:8px; display:none; z-index:1001;
 }
-/* open state */
-.menu.open .dropdown { display: block; }
+.menu.open .dropdown{display:block;}
 
-/* items inside dropdown (not .btn to avoid collisions) */
-.dd-item {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  padding: 12px;
-  border-radius: 10px;
-  transition: background .15s ease, transform .06s ease;
+.dd-item{
+  display:block; color:inherit; text-decoration:none;
+  padding:12px; border-radius:10px;
+  transition:background .15s ease, transform .06s ease;
 }
-.dd-item:hover  { background: rgba(0,0,0,0.10); }
-.dd-item:active { transform: translateY(1px); }
+.dd-item:hover{background:rgba(0,0,0,.10);}
+.dd-item:active{transform:translateY(1px);}
 </style>
 </head>
 <body>
   <header>
     <img src="FB logo.png" alt="Company Logo" class="logo" />
 
-    <!-- REPLACED: many buttons -> one dropdown with 5 kinds -->
     <nav class="header-buttons" aria-label="Γρήγορη πλοήγηση">
       <a class="btn" href="#apps">Διαδραστικές εφαρμογές</a>
 
+      <!-- Dropdown: Θέματα Πανελληνίων -->
       <div class="menu">
         <button class="btn" id="topicsBtn" aria-haspopup="true" aria-expanded="false" aria-controls="topicsMenu">
           Θέματα Πανελληνίων
           <span class="chev" aria-hidden="true"></span>
         </button>
-
         <div class="dropdown rose" id="topicsMenu" role="menu" aria-label="Θέματα Πανελληνίων">
           <a class="dd-item" role="menuitem" href="#GELtasks">Γ.Ε.Λ. Θέματα Πανελληνίων</a>
           <a class="dd-item" role="menuitem" href="#EPALtasks">ΕΠΑ.Λ. Θέματα Πανελληνίων</a>
@@ -187,11 +136,26 @@ footer {
           <a class="dd-item" role="menuitem" href="#OMOGENEIStasks">Ομογενείς Θέματα Πανελληνίων</a>
         </div>
       </div>
+
+      <!-- ΝΕΟ Dropdown: Λύσεις Πανελληνίων -->
+      <div class="menu">
+        <button class="btn" id="solutionsBtn" aria-haspopup="true" aria-expanded="false" aria-controls="solutionsMenu">
+          Λύσεις Πανελληνίων
+          <span class="chev" aria-hidden="true"></span>
+        </button>
+        <div class="dropdown rose" id="solutionsMenu" role="menu" aria-label="Λύσεις Πανελληνίων">
+          <a class="dd-item" role="menuitem" href="#GELsolutions">Γ.Ε.Λ. Λύσεις Πανελληνίων</a>
+          <a class="dd-item" role="menuitem" href="#EPALsolutions">ΕΠΑ.Λ. Λύσεις Πανελληνίων</a>
+          <a class="dd-item" role="menuitem" href="#GELEPANsolutions">Γ.Ε.Λ. Επαν. Λύσεις</a>
+          <a class="dd-item" role="menuitem" href="#EPALEPANsolutions">ΕΠΑ.Λ. Επαν. Λύσεις</a>
+          <a class="dd-item" role="menuitem" href="#OMOGENEISsolutions">Ομογενείς Λύσεις</a>
+        </div>
+      </div>
     </nav>
   </header>
-  
+
   <main>
-    <!-- 1) Διαδραστικές εφαρμογές -->
+    <!-- Διαδραστικές εφαρμογές -->
     <section id="apps" class="container">
       <h2>Διαδραστικές εφαρμογές</h2>
       <div class="links">
@@ -200,159 +164,227 @@ footer {
       </div>
     </section>
 
-    <!-- 2) Γ.Ε.Λ. Θέματα Πανελληνίων -->
+    <!-- Γ.Ε.Λ. Θέματα Πανελληνίων -->
     <section id="GELtasks" class="container">
       <h2>Γ.Ε.Λ. Θέματα Πανελληνίων</h2>
       <div class="pdf-grid">
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2000.pdf" target="_blank" rel="noopener noreferrer">2000</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2001.pdf" target="_blank" rel="noopener noreferrer">2001</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2002.pdf" target="_blank" rel="noopener noreferrer">2002</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2003.pdf" target="_blank" rel="noopener noreferrer">2003</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2004.pdf" target="_blank" rel="noopener noreferrer">2004</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2005.pdf" target="_blank" rel="noopener noreferrer">2005</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2006.pdf" target="_blank" rel="noopener noreferrer">2006</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2007.pdf" target="_blank" rel="noopener noreferrer">2007</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2008.pdf" target="_blank" rel="noopener noreferrer">2008</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2009.pdf" target="_blank" rel="noopener noreferrer">2009</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2010.pdf" target="_blank" rel="noopener noreferrer">2010</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2011.pdf" target="_blank" rel="noopener noreferrer">2011</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2012.pdf" target="_blank" rel="noopener noreferrer">2012</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2013.pdf" target="_blank" rel="noopener noreferrer">2013</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2014.pdf" target="_blank" rel="noopener noreferrer">2014</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2015.pdf" target="_blank" rel="noopener noreferrer">2015</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2016.pdf" target="_blank" rel="noopener noreferrer">2016</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2017.pdf" target="_blank" rel="noopener noreferrer">2017</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2017_ΥΠΟΛ.pdf" target="_blank" rel="noopener noreferrer">2017_Β</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2018.pdf" target="_blank" rel="noopener noreferrer">2018</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2019.pdf" target="_blank" rel="noopener noreferrer">2019</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2020.pdf" target="_blank" rel="noopener noreferrer">2020</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2020_ΠΑΛΑΙΟ.pdf" target="_blank" rel="noopener noreferrer">2020_Β</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2021.pdf" target="_blank" rel="noopener noreferrer">2021</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2022.pdf" target="_blank" rel="noopener noreferrer">2022</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2023.pdf" target="_blank" rel="noopener noreferrer">2023</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2024.pdf" target="_blank" rel="noopener noreferrer">2024</a>
-        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2025.pdf" target="_blank" rel="noopener noreferrer">2025</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2000.pdf" target="_blank" rel="noopener">2000</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2001.pdf" target="_blank" rel="noopener">2001</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2002.pdf" target="_blank" rel="noopener">2002</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2003.pdf" target="_blank" rel="noopener">2003</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2004.pdf" target="_blank" rel="noopener">2004</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2005.pdf" target="_blank" rel="noopener">2005</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2006.pdf" target="_blank" rel="noopener">2006</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2007.pdf" target="_blank" rel="noopener">2007</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2008.pdf" target="_blank" rel="noopener">2008</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2009.pdf" target="_blank" rel="noopener">2009</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2010.pdf" target="_blank" rel="noopener">2010</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2011.pdf" target="_blank" rel="noopener">2011</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2012.pdf" target="_blank" rel="noopener">2012</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2013.pdf" target="_blank" rel="noopener">2013</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2014.pdf" target="_blank" rel="noopener">2014</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2015.pdf" target="_blank" rel="noopener">2015</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2016.pdf" target="_blank" rel="noopener">2016</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2017.pdf" target="_blank" rel="noopener">2017</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2017_ΥΠΟΛ.pdf" target="_blank" rel="noopener">2017_Β</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2018.pdf" target="_blank" rel="noopener">2018</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2019.pdf" target="_blank" rel="noopener">2019</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2020_ΝΕΟ.pdf" target="_blank" rel="noopener">2020</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2020_ΠΑΛΑΙΟ.pdf" target="_blank" rel="noopener">2020_Β</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2021.pdf" target="_blank" rel="noopener">2021</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2022.pdf" target="_blank" rel="noopener">2022</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2023.pdf" target="_blank" rel="noopener">2023</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2024.pdf" target="_blank" rel="noopener">2024</a>
+        <a class="btn" href="ΓΕΛ_ΘΕΜΑΤΑ_2025.pdf" target="_blank" rel="noopener">2025</a>
       </div>
     </section>
 
-    <!-- 3) ΕΠΑ.Λ. Θέματα Πανελληνίων -->
+    <!-- ΕΠΑ.Λ. Θέματα Πανελληνίων -->
     <section id="EPALtasks" class="container">
       <h2>ΕΠΑ.Λ. Θέματα Πανελληνίων</h2>
       <div class="pdf-grid">
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2009.pdf" target="_blank" rel="noopener noreferrer">2009</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2010.pdf" target="_blank" rel="noopener noreferrer">2010</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2011.pdf" target="_blank" rel="noopener noreferrer">2011</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2012.pdf" target="_blank" rel="noopener noreferrer">2012</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2013.pdf" target="_blank" rel="noopener noreferrer">2013</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2014.pdf" target="_blank" rel="noopener noreferrer">2014</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2015.pdf" target="_blank" rel="noopener noreferrer">2015</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2016.pdf" target="_blank" rel="noopener noreferrer">2016</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2016_ΠΑΛΑΙΟ.pdf" target="_blank" rel="noopener noreferrer">2016_Β</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2017.pdf" target="_blank" rel="noopener noreferrer">2017</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2018.pdf" target="_blank" rel="noopener noreferrer">2018</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2019.pdf" target="_blank" rel="noopener noreferrer">2019</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2020.pdf" target="_blank" rel="noopener noreferrer">2020</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2021.pdf" target="_blank" rel="noopener noreferrer">2021</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2022.pdf" target="_blank" rel="noopener noreferrer">2022</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2023.pdf" target="_blank" rel="noopener noreferrer">2023</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2024.pdf" target="_blank" rel="noopener noreferrer">2024</a>
-        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2025.pdf" target="_blank" rel="noopener noreferrer">2025</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2009.pdf" target="_blank" rel="noopener">2009</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2010.pdf" target="_blank" rel="noopener">2010</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2011.pdf" target="_blank" rel="noopener">2011</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2012.pdf" target="_blank" rel="noopener">2012</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2013.pdf" target="_blank" rel="noopener">2013</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2014.pdf" target="_blank" rel="noopener">2014</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2015.pdf" target="_blank" rel="noopener">2015</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2016.pdf" target="_blank" rel="noopener">2016</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2016_ΠΑΛΑΙΟ.pdf" target="_blank" rel="noopener">2016_Β</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2017.pdf" target="_blank" rel="noopener">2017</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2018.pdf" target="_blank" rel="noopener">2018</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2019.pdf" target="_blank" rel="noopener">2019</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2020.pdf" target="_blank" rel="noopener">2020</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2021.pdf" target="_blank" rel="noopener">2021</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2022.pdf" target="_blank" rel="noopener">2022</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2023.pdf" target="_blank" rel="noopener">2023</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2024.pdf" target="_blank" rel="noopener">2024</a>
+        <a class="btn" href="ΕΠΑΛ_ΘΕΜΑΤΑ_2025.pdf" target="_blank" rel="noopener">2025</a>
       </div>
     </section>
 
-    <!-- 4) Γ.Ε.Λ. Επαναληπτικά Θέματα Πανελληνίων -->
+    <!-- Γ.Ε.Λ. Επαναληπτικά Θέματα -->
     <section id="GELEPANtasks" class="container">
       <h2>Γ.Ε.Λ. Επαναληπτικά Θέματα Πανελληνίων</h2>
       <div class="pdf-grid">
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2003.pdf" target="_blank" rel="noopener noreferrer">2003</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2004.pdf" target="_blank" rel="noopener noreferrer">2004</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2005.pdf" target="_blank" rel="noopener noreferrer">2005</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2006.pdf" target="_blank" rel="noopener noreferrer">2006</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2007.pdf" target="_blank" rel="noopener noreferrer">2007</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2008.pdf" target="_blank" rel="noopener noreferrer">2008</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2009.pdf" target="_blank" rel="noopener noreferrer">2009</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2010.pdf" target="_blank" rel="noopener noreferrer">2010</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2011.pdf" target="_blank" rel="noopener noreferrer">2011</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2012.pdf" target="_blank" rel="noopener noreferrer">2012</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2013.pdf" target="_blank" rel="noopener noreferrer">2013</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2014.pdf" target="_blank" rel="noopener noreferrer">2014</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2015.pdf" target="_blank" rel="noopener noreferrer">2015</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2016.pdf" target="_blank" rel="noopener noreferrer">2016</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2017.pdf" target="_blank" rel="noopener noreferrer">2017</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2018.pdf" target="_blank" rel="noopener noreferrer">2018</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2019.pdf" target="_blank" rel="noopener noreferrer">2019</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2020.pdf" target="_blank" rel="noopener noreferrer">2020</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2020_ΠΑΛΑΙΟ.pdf" target="_blank" rel="noopener noreferrer">2020_Β</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2021.pdf" target="_blank" rel="noopener noreferrer">2021</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2022.pdf" target="_blank" rel="noopener noreferrer">2022</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2023.pdf" target="_blank" rel="noopener noreferrer">2023</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2024.pdf" target="_blank" rel="noopener noreferrer">2024</a>
-        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2025.pdf" target="_blank" rel="noopener noreferrer">2025</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2003.pdf" target="_blank" rel="noopener">2003</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2004.pdf" target="_blank" rel="noopener">2004</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2005.pdf" target="_blank" rel="noopener">2005</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2006.pdf" target="_blank" rel="noopener">2006</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2007.pdf" target="_blank" rel="noopener">2007</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2008.pdf" target="_blank" rel="noopener">2008</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2009.pdf" target="_blank" rel="noopener">2009</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2010.pdf" target="_blank" rel="noopener">2010</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2011.pdf" target="_blank" rel="noopener">2011</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2012.pdf" target="_blank" rel="noopener">2012</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2013.pdf" target="_blank" rel="noopener">2013</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2014.pdf" target="_blank" rel="noopener">2014</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2015.pdf" target="_blank" rel="noopener">2015</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2016.pdf" target="_blank" rel="noopener">2016</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2017.pdf" target="_blank" rel="noopener">2017</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2018.pdf" target="_blank" rel="noopener">2018</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2019.pdf" target="_blank" rel="noopener">2019</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2020_ΝΕΟ.pdf" target="_blank" rel="noopener">2020</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2020_ΠΑΛΑΙΟ.pdf" target="_blank" rel="noopener">2020_Β</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2021.pdf" target="_blank" rel="noopener">2021</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2022.pdf" target="_blank" rel="noopener">2022</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2023.pdf" target="_blank" rel="noopener">2023</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2024.pdf" target="_blank" rel="noopener">2024</a>
+        <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2025.pdf" target="_blank" rel="noopener">2025</a>
       </div>
     </section>
 
-    <!-- 5) ΕΠΑ.Λ. Επαναληπτικά Θέματα Πανελληνίων -->
+    <!-- ΕΠΑ.Λ. Επαναληπτικά Θέματα -->
     <section id="EPALEPANtasks" class="container">
       <h2>ΕΠΑ.Λ. Επαναληπτικά Θέματα Πανελληνίων</h2>
       <div class="pdf-grid">
-        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2016.pdf" target="_blank" rel="noopener noreferrer">2016</a>
-        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2016_ΠΑΛΑΙΟ.pdf" target="_blank" rel="noopener noreferrer">2016_Β</a>
-        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2017.pdf" target="_blank" rel="noopener noreferrer">2017</a>
-        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2018.pdf" target="_blank" rel="noopener noreferrer">2018</a>
-        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2019.pdf" target="_blank" rel="noopener noreferrer">2019</a>
-        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2020.pdf" target="_blank" rel="noopener noreferrer">2020</a>
-        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2021.pdf" target="_blank" rel="noopener noreferrer">2021</a>
-        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2022.pdf" target="_blank" rel="noopener noreferrer">2022</a>
-        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2023.pdf" target="_blank" rel="noopener noreferrer">2023</a>
-        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2024.pdf" target="_blank" rel="noopener noreferrer">2024</a>
-        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2025.pdf" target="_blank" rel="noopener noreferrer">2025</a>
+        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2016.pdf" target="_blank" rel="noopener">2016</a>
+        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2016_ΠΑΛΑΙΟ.pdf" target="_blank" rel="noopener">2016_Β</a>
+        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2017.pdf" target="_blank" rel="noopener">2017</a>
+        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2018.pdf" target="_blank" rel="noopener">2018</a>
+        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2019.pdf" target="_blank" rel="noopener">2019</a>
+        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2020.pdf" target="_blank" rel="noopener">2020</a>
+        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2021.pdf" target="_blank" rel="noopener">2021</a>
+        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2022.pdf" target="_blank" rel="noopener">2022</a>
+        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2023.pdf" target="_blank" rel="noopener">2023</a>
+        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2024.pdf" target="_blank" rel="noopener">2024</a>
+        <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2025.pdf" target="_blank" rel="noopener">2025</a>
       </div>
     </section>
 
-    <!-- 6) Ομογενείς Θέματα Πανελληνίων -->
+    <!-- Ομογενείς Θέματα -->
     <section id="OMOGENEIStasks" class="container">
       <h2>Ομογενείς Θέματα Πανελληνίων</h2>
       <div class="pdf-grid">
-        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2016.pdf" target="_blank" rel="noopener noreferrer">2016</a>
-        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2017.pdf" target="_blank" rel="noopener noreferrer">2017</a>
-        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2018.pdf" target="_blank" rel="noopener noreferrer">2018</a>
-        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2019.pdf" target="_blank" rel="noopener noreferrer">2019</a>
-        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2020.pdf" target="_blank" rel="noopener noreferrer">2020</a>
-        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2020_ΠΑΛΑΙΟ.pdf" target="_blank" rel="noopener noreferrer">2020_Β</a>
-        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2021.pdf" target="_blank" rel="noopener noreferrer">2021</a>
-        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2022.pdf" target="_blank" rel="noopener noreferrer">2022</a>
-        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2023.pdf" target="_blank" rel="noopener noreferrer">2023</a>
-        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2024.pdf" target="_blank" rel="noopener noreferrer">2024</a>
-        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2025.pdf" target="_blank" rel="noopener noreferrer">2025</a>
+        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2016.pdf" target="_blank" rel="noopener">2016</a>
+        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2017.pdf" target="_blank" rel="noopener">2017</a>
+        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2018.pdf" target="_blank" rel="noopener">2018</a>
+        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2019.pdf" target="_blank" rel="noopener">2019</a>
+        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2020.pdf" target="_blank" rel="noopener">2020</a>
+        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2020_ΠΑΛΑΙΟ.pdf" target="_blank" rel="noopener">2020_Β</a>
+        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2021.pdf" target="_blank" rel="noopener">2021</a>
+        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2022.pdf" target="_blank" rel="noopener">2022</a>
+        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2023.pdf" target="_blank" rel="noopener">2023</a>
+        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2024.pdf" target="_blank" rel="noopener">2024</a>
+        <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2025.pdf" target="_blank" rel="noopener">2025</a>
       </div>
+    </section>
+
+    <!-- ===== ΝΕΟ BLOCK: «Λύσεις» Γρήγορη Πλοήγηση ===== -->
+    <section id="solutions" class="container">
+      <h2>Λύσεις – Ομάδες</h2>
+      <div class="links">
+        <a class="btn" href="#GELsolutions">Γ.Ε.Λ. Λύσεις</a>
+        <a class="btn" href="#EPALsolutions">ΕΠΑ.Λ. Λύσεις</a>
+        <a class="btn" href="#GELEPANsolutions">Γ.Ε.Λ. Επαν. Λύσεις</a>
+        <a class="btn" href="#EPALEPANsolutions">ΕΠΑ.Λ. Επαν. Λύσεις</a>
+        <a class="btn" href="#OMOGENEISsolutions">Ομογενείς Λύσεις</a>
+      </div>
+    </section>
+
+    <!-- ===== ΝΕΕΣ ΕΝΟΤΗΤΕΣ ΛΥΣΕΩΝ (placeholders, γέμισε με pdf-grid όπως στα Θέματα) ===== -->
+    <section id="GELsolutions" class="container">
+      <h2>Γ.Ε.Λ. Λύσεις Πανελληνίων</h2>
+      <!-- Παράδειγμα:
+      <div class="pdf-grid">
+        <a class="btn" href="ΓΕΛ_ΛΥΣΕΙΣ_2015.pdf" target="_blank" rel="noopener">2015</a>
+        ...
+      </div> -->
+    </section>
+
+    <section id="EPALsolutions" class="container">
+      <h2>ΕΠΑ.Λ. Λύσεις Πανελληνίων</h2>
+    </section>
+
+    <section id="GELEPANsolutions" class="container">
+      <h2>Γ.Ε.Λ. Επαναληπτικές – Λύσεις</h2>
+    </section>
+
+    <section id="EPALEPANsolutions" class="container">
+      <h2>ΕΠΑ.Λ. Επαναληπτικές – Λύσεις</h2>
+    </section>
+
+    <section id="OMOGENEISsolutions" class="container">
+      <h2>Ομογενείς – Λύσεις</h2>
     </section>
   </main>
 
   <footer>
-    <a class="btn" href="mailto:chrimpen@hotmail.gr" target="chrimpen@hotmail.gr" rel="noopener noreferrer">Mail</a>
-    <a class="btn" href="https://forms.gle/qL8Cju8iMPPZdKMw7" target="https://forms.gle/qL8Cju8iMPPZdKMw7" rel="noopener noreferrer">Φόρμα επικοινωνίας</a>
-    <a class="btn" href="https://open.spotify.com/show/4T8pEDLtQePgjHe7SmZj7f?si=zpAtk0IxRkCKObk26T5Cxg" target="https://open.spotify.com/show/4T8pEDLtQePgjHe7SmZj7f?si=zpAtk0IxRkCKObk26T5Cxg" rel="noopener noreferrer">Spotify</a>
-    <a class="btn" href="https://www.instagram.com/ao8_4_u?igsh=d2hmcXhwaWxpc2ti&utm_source=qr" target="https://www.instagram.com/ao8_4_u?igsh=d2hmcXhwaWxpc2ti&utm_source=qr" rel="noopener noreferrer">Instagram</a>
-    <a class="btn" href="https://www.tiktok.com/@aoth4u?_t=ZN-90XeXjZNrwU&_r=1" target="https://www.tiktok.com/@aoth4u?_t=ZN-90XeXjZNrwU&_r=1" rel="noopener noreferrer">TikTok</a>
+    <a class="btn" href="mailto:chrimpen@hotmail.gr" target="_blank" rel="noopener">Mail</a>
+    <a class="btn" href="https://forms.gle/qL8Cju8iMPPZdKMw7" target="_blank" rel="noopener">Φόρμα επικοινωνίας</a>
+    <a class="btn" href="https://open.spotify.com/show/4T8pEDLtQePgjHe7SmZj7f?si=zpAtk0IxRkCKObk26T5Cxg" target="_blank" rel="noopener">Spotify</a>
+    <a class="btn" href="https://www.instagram.com/ao8_4_u?igsh=d2hmcXhwaWxpc2ti&utm_source=qr" target="_blank" rel="noopener">Instagram</a>
+    <a class="btn" href="https://www.tiktok.com/@aoth4u?_t=ZN-90XeXjZNrwU&_r=1" target="_blank" rel="noopener">TikTok</a>
   </footer>
 
-  <!-- NEW: tiny JS for dropdown -->
+  <!-- JS: πολλαπλά dropdown + dynamic sticky offset -->
   <script>
     (function () {
-      const menu    = document.querySelector('.menu');
-      if (!menu) return;
-      const trigger = document.getElementById('topicsBtn');
-      const panel   = document.getElementById('topicsMenu');
+      // Υποστήριξη ΠΟΛΛΩΝ dropdowns μέσα στο header
+      const menus = Array.from(document.querySelectorAll('.menu'));
 
-      function setOpen(open) {
-        menu.classList.toggle('open', open);
-        trigger.setAttribute('aria-expanded', String(open));
+      function setOpen(menuEl, open) {
+        const btn = menuEl.querySelector('button[id]');
+        if (!btn) return;
+        menuEl.classList.toggle('open', open);
+        btn.setAttribute('aria-expanded', String(open));
       }
 
-      trigger.addEventListener('click', () => setOpen(!menu.classList.contains('open')));
-      document.addEventListener('click', (e) => { if (!menu.contains(e.target)) setOpen(false); });
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
-      panel.querySelectorAll('.dd-item').forEach(a => a.addEventListener('click', () => setOpen(false)));
+      menus.forEach(menuEl => {
+        const btn = menuEl.querySelector('button[id]');
+        const panelId = btn && btn.getAttribute('aria-controls');
+        const panel = panelId && document.getElementById(panelId);
+        if (!btn || !panel) return;
+
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const willOpen = !menuEl.classList.contains('open');
+          // Κλείσε όσα είναι ανοιχτά
+          menus.forEach(m => setOpen(m, false));
+          setOpen(menuEl, willOpen);
+        });
+
+        panel.querySelectorAll('.dd-item').forEach(a => {
+          a.addEventListener('click', () => setOpen(menuEl, false));
+        });
+      });
+
+      // Κλείσιμο όταν γίνεται κλικ εκτός
+      document.addEventListener('click', () => menus.forEach(m => setOpen(m, false)));
+      // Esc για κλείσιμο
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') menus.forEach(m => setOpen(m, false));
+      });
+
+      // Dynamic header offset για anchor targets
+      const header = document.querySelector('header');
+      function setOffset(){
+        if(!header) return;
+        const h = Math.ceil(header.getBoundingClientRect().height);
+        document.documentElement.style.setProperty('--header-offset', (h + 8) + 'px');
+      }
+      setOffset(); window.addEventListener('resize', setOffset);
     })();
   </script>
 </body>
