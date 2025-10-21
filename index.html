@@ -10,8 +10,13 @@
   --rose: #f43f5e; /* rose pink base */
   --rose-600: #e11d48; /* hover/active */
   --text-on-rose: #fff; /* button text */
+  --header-offset:96px; /* θα προσαρμοστεί δυναμικά με JS */
 }
 
+/* Native anchor offset */
+html{scroll-behavior:smooth; scroll-padding-top:var(--header-offset);}
+section{scroll-margin-top:var(--header-offset);}
+  
 html, body { height: 100%; scroll-behavior: smooth; }
 body {
   margin: 0;
