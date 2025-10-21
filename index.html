@@ -85,7 +85,7 @@ main {
 }
 
 /* Rose button style (reused) */
-a.btn {
+.btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -99,8 +99,8 @@ a.btn {
   box-shadow: 0 6px 18px rgba(244, 63, 94, .25);
   transition: transform .06s ease, background .2s ease, box-shadow .2s ease;
 }
-a.btn:hover { background: var(--rose-600); }
-a.btn:active { transform: translateY(1px); box-shadow: 0 4px 12px rgba(244,63,94,.28); }
+.btn:hover { background: var(--rose-600); }
+.btn:active { transform: translateY(1px); box-shadow: 0 4px 12px rgba(244,63,94,.28); }
 
 @media (prefers-reduced-motion: reduce) {
   a.btn { transition: background .2s ease; }
