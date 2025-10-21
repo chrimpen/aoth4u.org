@@ -22,14 +22,14 @@ body {
 }
 
 header {
-  position: sticky; /* NEW: stays visible */
-  top: 0;           /* NEW */
-  z-index: 1000;    /* NEW: on top of content */
+  position: sticky; /* stays visible */
+  top: 0;
+  z-index: 1000; /* on top of content */
   display: flex;
   align-items: center;
   justify-content: space-between; /* logo left, buttons right */
   padding: clamp(12px, 3vw, 20px);
-  background: rgba(255, 193, 7, 0.9); /* subtle backdrop so text stays readable */
+  background: rgba(255, 193, 7, 0.9); /* amber */
   -webkit-backdrop-filter: saturate(140%) blur(6px);
   backdrop-filter: saturate(140%) blur(6px);
   box-shadow: 0 2px 8px rgba(0,0,0,.12);
@@ -71,13 +71,12 @@ main {
   .links { grid-template-columns: 1fr 1fr; }
 }
 
-/* NEW: 5x5 grid for PDFs */
+/* 5x5 grid for PDFs (responsive) */
 .pdf-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 12px;
 }
-/* Make it friendlier on narrow screens without changing desktop 5x5 */
 @media (max-width: 700px) {
   .pdf-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -85,7 +84,7 @@ main {
   .pdf-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* Rose button style (reused for header + main + footer) */
+/* Rose button style (reused) */
 a.btn {
   display: inline-flex;
   align-items: center;
@@ -118,31 +117,72 @@ footer {
 @media (min-width: 640px) {
   footer { grid-template-columns: repeat(5, auto); }
 }
+
+/* ====== NEW: dropdown bits (minimal additions) ====== */
+.menu { position: relative; }
+
+/* chevron arrow */
+.chev {
+  width: 10px; height: 10px; margin-left: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform .2s ease;
+  opacity: .9;
+}
+#topicsBtn[aria-expanded="true"] .chev { transform: rotate(225deg); }
+
+/* dropdown panel (same rose bg as buttons) */
+.dropdown.rose {
+  position: absolute; right: 0; top: calc(100% + 8px);
+  min-width: 260px;
+  background: var(--rose);
+  color: var(--text-on-rose);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0,0,0,.25);
+  padding: 8px;
+  display: none;
+  z-index: 1001;
+}
+/* open state */
+.menu.open .dropdown { display: block; }
+
+/* items inside dropdown (not .btn to avoid collisions) */
+.dd-item {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 12px;
+  border-radius: 10px;
+  transition: background .15s ease, transform .06s ease;
+}
+.dd-item:hover  { background: rgba(0,0,0,0.10); }
+.dd-item:active { transform: translateY(1px); }
 </style>
 </head>
 <body>
-  <header> 
-    <img src="FB logo.png" alt="Company Logo" class="logo" /> 
-    <!-- Two buttons on the top-right leading to each container --> 
+  <header>
+    <img src="FB logo.png" alt="Company Logo" class="logo" />
+
+    <!-- REPLACED: many buttons -> one dropdown with 5 kinds -->
     <nav class="header-buttons" aria-label="Γρήγορη πλοήγηση">
-  <a class="btn" href="#apps">Διαδραστικές εφαρμογές</a>
+      <a class="btn" href="#apps">Διαδραστικές εφαρμογές</a>
 
-  <!-- Dropdown -->
-  <div class="menu">
-    <button class="btn" id="topicsBtn" aria-haspopup="true" aria-expanded="false" aria-controls="topicsMenu">
-      Θέματα Πανελληνίων
-      <span class="chev" aria-hidden="true"></span>
-    </button>
+      <div class="menu">
+        <button class="btn" id="topicsBtn" aria-haspopup="true" aria-expanded="false" aria-controls="topicsMenu">
+          Θέματα Πανελληνίων
+          <span class="chev" aria-hidden="true"></span>
+        </button>
 
-    <div class="dropdown rose" id="topicsMenu" role="menu" aria-label="Θέματα Πανελληνίων">
-      <a class="dd-item" role="menuitem" href="#GELtasks">Γ.Ε.Λ. Θέματα Πανελληνίων</a>
-      <a class="dd-item" role="menuitem" href="#EPALtasks">ΕΠΑ.Λ. Θέματα Πανελληνίων</a>
-      <a class="dd-item" role="menuitem" href="#GELEPANtasks">Γ.Ε.Λ. Επαν. Θέματα</a>
-      <a class="dd-item" role="menuitem" href="#EPALEPANtasks">ΕΠΑ.Λ. Επαν. Θέματα</a>
-      <a class="dd-item" role="menuitem" href="#OMOGENEIStasks">Ομογενείς Θέματα</a>
-    </div>
-  </div>
-</nav>
+        <div class="dropdown rose" id="topicsMenu" role="menu" aria-label="Θέματα Πανελληνίων">
+          <a class="dd-item" role="menuitem" href="#GELtasks">Γ.Ε.Λ. Θέματα Πανελληνίων</a>
+          <a class="dd-item" role="menuitem" href="#EPALtasks">ΕΠΑ.Λ. Θέματα Πανελληνίων</a>
+          <a class="dd-item" role="menuitem" href="#GELEPANtasks">Γ.Ε.Λ. Επαν. Θέματα Πανελληνίων</a>
+          <a class="dd-item" role="menuitem" href="#EPALEPANtasks">ΕΠΑ.Λ. Επαν. Θέματα Πανελληνίων</a>
+          <a class="dd-item" role="menuitem" href="#OMOGENEIStasks">Ομογενείς Θέματα Πανελληνίων</a>
+        </div>
+      </div>
+    </nav>
   </header>
   
   <main>
@@ -190,7 +230,7 @@ footer {
       </div>
     </section>
 
-<!-- 3) ΕΠΑ.Λ. Θέματα Πανελληνίων -->
+    <!-- 3) ΕΠΑ.Λ. Θέματα Πανελληνίων -->
     <section id="EPALtasks" class="container">
       <h2>ΕΠΑ.Λ. Θέματα Πανελληνίων</h2>
       <div class="pdf-grid">
@@ -216,7 +256,7 @@ footer {
     </section>
 
     <!-- 4) Γ.Ε.Λ. Επαναληπτικά Θέματα Πανελληνίων -->
-    <section id="#GELEPANtasks" class="container">
+    <section id="GELEPANtasks" class="container">
       <h2>Γ.Ε.Λ. Επαναληπτικά Θέματα Πανελληνίων</h2>
       <div class="pdf-grid">
         <a class="btn" href="ΓΕΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2003.pdf" target="_blank" rel="noopener noreferrer">2003</a>
@@ -247,7 +287,7 @@ footer {
     </section>
 
     <!-- 5) ΕΠΑ.Λ. Επαναληπτικά Θέματα Πανελληνίων -->
-    <section id="#EPALEPANtasks" class="container">
+    <section id="EPALEPANtasks" class="container">
       <h2>ΕΠΑ.Λ. Επαναληπτικά Θέματα Πανελληνίων</h2>
       <div class="pdf-grid">
         <a class="btn" href="ΕΠΑΛ_ΕΠΑΝ_ΘΕΜΑΤΑ_2016.pdf" target="_blank" rel="noopener noreferrer">2016</a>
@@ -265,7 +305,7 @@ footer {
     </section>
 
     <!-- 6) Ομογενείς Θέματα Πανελληνίων -->
-    <section id="#OMOGENEIStasks" class="container">
+    <section id="OMOGENEIStasks" class="container">
       <h2>Ομογενείς Θέματα Πανελληνίων</h2>
       <div class="pdf-grid">
         <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2016.pdf" target="_blank" rel="noopener noreferrer">2016</a>
@@ -281,8 +321,6 @@ footer {
         <a class="btn" href="ΟΜΟΓΕΝΕΙΣ_ΘΕΜΑΤΑ_2025.pdf" target="_blank" rel="noopener noreferrer">2025</a>
       </div>
     </section>
-
-
   </main>
 
   <footer>
@@ -292,5 +330,25 @@ footer {
     <a class="btn" href="https://www.instagram.com/ao8_4_u?igsh=d2hmcXhwaWxpc2ti&utm_source=qr" target="https://www.instagram.com/ao8_4_u?igsh=d2hmcXhwaWxpc2ti&utm_source=qr" rel="noopener noreferrer">Instagram</a>
     <a class="btn" href="https://www.tiktok.com/@aoth4u?_t=ZN-90XeXjZNrwU&_r=1" target="https://www.tiktok.com/@aoth4u?_t=ZN-90XeXjZNrwU&_r=1" rel="noopener noreferrer">TikTok</a>
   </footer>
+
+  <!-- NEW: tiny JS for dropdown -->
+  <script>
+    (function () {
+      const menu    = document.querySelector('.menu');
+      if (!menu) return;
+      const trigger = document.getElementById('topicsBtn');
+      const panel   = document.getElementById('topicsMenu');
+
+      function setOpen(open) {
+        menu.classList.toggle('open', open);
+        trigger.setAttribute('aria-expanded', String(open));
+      }
+
+      trigger.addEventListener('click', () => setOpen(!menu.classList.contains('open')));
+      document.addEventListener('click', (e) => { if (!menu.contains(e.target)) setOpen(false); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+      panel.querySelectorAll('.dd-item').forEach(a => a.addEventListener('click', () => setOpen(false)));
+    })();
+  </script>
 </body>
 </html>
