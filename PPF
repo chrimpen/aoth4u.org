@@ -1,0 +1,465 @@
+
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Καμπύλη Παραγωγικών Δυνατοτήτων (ΚΠΔ)</title>
+  <style>
+    :root{
+      --bg:#0f172a;      /* slate-900 */
+      --panel:#111827;   /* gray-900 */
+      --muted:#94a3b8;   /* slate-400 */
+      --text:#e5e7eb;    /* gray-200 */
+      --accent:#38bdf8;  /* sky-400 */
+      --accent-2:#22c55e;/* green-500 */
+      --danger:#ef4444;  /* red-500 */
+      --border:#1f2937;  /* gray-800 */
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; padding:24px; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background:radial-gradient(1200px 1200px at 100% -200px, #1e293b 10%, var(--bg) 60%);
+      color:var(--text);
+    }
+    h1{font-size:clamp(22px,2.5vw,32px); margin:0 0 8px}
+    p.lead{margin:0 12px 20px 0; color:var(--muted)}
+    .wrap{display:block}
+    .card{background:rgba(17,24,39,.6); border:1px solid var(--border); border-radius:18px; padding:16px; box-shadow:0 6px 24px rgba(0,0,0,.25); margin-bottom:16px}
+    label{display:block; font-size:14px; color:var(--muted); margin-bottom:6px}
+    input[type="number"], button, select{
+      background:#0b1220; color:var(--text); border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-size:14px; outline:none; transition:.2s border-color;
+    }
+    input[type="number"]:focus, button:focus{border-color:var(--accent)}
+    .controls{display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap}
+    .controls > div{flex:1 1 220px}
+    table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:14px; border:1px solid var(--border)}
+    thead th{position:sticky; top:0; background:#0b1220; z-index:1}
+    th, td{padding:10px 12px; border-bottom:1px solid var(--border); text-align:center}
+    th{font-weight:600; color:#cbd5e1}
+    tbody tr:last-child td{border-bottom:none}
+    tbody tr:nth-child(odd){background:rgba(148,163,184,.05)}
+    tr.keline{background:rgba(56,189,248,.08)}
+    tr.keline td:first-child{font-style:italic; color:#e0f2fe}
+    .cell-readonly{color:#cbd5e1}
+    .btn{cursor:pointer; font-weight:600}
+    .btn.primary{background:linear-gradient(135deg, var(--accent), #7dd3fc); color:#0b1220}
+    .btn.secondary{background:#0b1220}
+    .btn.danger{background:linear-gradient(135deg, var(--danger), #fb7185); color:white}
+    .stack{display:flex; gap:10px; flex-wrap:wrap}
+    canvas{width:100%; height:520px; background:#0b1220; border:1px solid var(--border); border-radius:16px}
+    .hint{font-size:13px; color:var(--muted)}
+    .badge{display:inline-block; padding:3px 8px; border-radius:999px; font-weight:700; font-size:12px; background:rgba(56,189,248,.18); color:#e0f2fe; border:1px solid rgba(56,189,248,.5)}
+    .footer{margin-top:10px; font-size:12px; color:var(--muted)}
+  </style>
+</head>
+<body>
+  <h1>Καμπύλη Παραγωγικών Δυνατοτήτων (ΚΠΔ)</h1>
+  <p class="lead">Ο οριζόντιος άξονας είναι <strong>Ψ</strong> και ο κατακόρυφος είναι <strong>Χ</strong>. Η γραμμή <span class="badge">ΚΕ</span> μπαίνει ανάμεσα στους συνδυασμούς (ΑΒ, ΒΓ, …) και είναι επεξεργάσιμη.</p>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="controls">
+        <div>
+          <label for="nPairs">Πόσα ζεύγη (Χ, Ψ);</label>
+          <input id="nPairs" type="number" min="2" max="24" value="4" />
+        </div>
+        <div>
+          <label>Ετικέτες συνδυασμών</label>
+          <select id="labelsMode">
+            <option value="greek" selected>Α, Β, Γ, Δ, …</option>
+            <option value="numeric">1, 2, 3, 4, …</option>
+          </select>
+        </div>
+        <div class="stack">
+          <button class="btn primary" id="buildBtn">Δημιούργησε πίνακα</button>
+          <button class="btn secondary" id="calcBtn" title="Συμπληρώνει κενά Χ/Ψ από ΚΕ, υπολογίζει ΚΕ και σχεδιάζει ΚΠΔ">Υπολογισμός & Καμπύλη</button>
+          <button class="btn danger" id="resetBtn">Reset</button>
+        </div>
+      </div>
+
+      <div style="margin-top:14px; overflow:auto">
+        <table id="ppfTable" aria-label="Πίνακας Παραγωγικών Δυνατοτήτων">
+          <thead>
+            <tr>
+              <th style="width:130px">Συν/μοι</th>
+              <th>Χ</th>
+              <th>Ψ</th>
+              <th>ΚΕ<sub>χ</sub> (= |ΔΨ/ΔΧ|)</th>
+              <th>ΚΕ<sub>ψ</sub> (= |ΔΧ/ΔΨ|)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="hint" style="margin-top:10px">
+        Συμπλήρωσε τα σημεία (Χ,Ψ) και/ή τις ΚΕ ανάμεσα στα ζεύγη. Με «Υπολογισμός»:
+        <ul style="margin:6px 0 0 18px; padding-left:0">
+          <li>Συμπληρώνονται άγνωστα Χ/Ψ από δοσμένες ΚΕ (υποθέτοντας Χ↑ και Ψ↓ κατά μήκος της ΚΠΔ).</li>
+          <li>Υπολογίζονται τυχόν κενές ΚΕ από τα δεδομένα.</li>
+          <li>Σχεδιάζεται η ΚΠΔ (οριζόντιος Ψ — κατακόρυφος Χ).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <label>Καμπύλη Παραγωγικών Δυνατοτήτων</label>
+      <canvas id="ppfCanvas" width="1200" height="560" aria-label="Διάγραμμα ΚΠΔ"></canvas>
+      <div class="controls" style="margin-top:10px">
+        <div>
+          <label>Πρόσθετο σημείο (π.χ. Κ, Χ=5, Ψ=50)</label>
+          <div class="stack">
+            <input id="extraName" placeholder="Όνομα (π.χ. Κ)" style="max-width:120px">
+            <input id="extraChi" type="number" step="any" inputmode="decimal" placeholder="Χ">
+            <input id="extraPsi" type="number" step="any" inputmode="decimal" placeholder="Ψ">
+            <button class="btn primary" id="addPointBtn">Προσθήκη στο διάγραμμα</button>
+            <button class="btn secondary" id="clearExtraBtn" title="Καθαρισμός πρόσθετων σημείων">Καθαρισμός</button>
+          </div>
+        </div>
+      </div>
+      <div id="classifyMsg" class="footer"></div>
+      <div class="footer">Οριζόντιος άξονας: Ψ &nbsp;—&nbsp; Κάθετος: Χ. Τα σημεία ενώνονται με γραμμή PPF και σημειώνονται με τις ετικέτες (Α, Β, Γ, …).</div>
+    </div>
+  </div>
+
+  <script>
+    const greekLabels = ["Α","Β","Γ","Δ","Ε","Ζ","Η","Θ","Ι","Κ","Λ","Μ","Ν","Ξ","Ο","Π","Ρ","Σ","Τ","Υ","Φ","Χ","Ψ","Ω"]; // μέχρι 24
+
+    const el = (sel, parent=document) => parent.querySelector(sel);
+    const els = (sel, parent=document) => [...parent.querySelectorAll(sel)];
+
+    const tbody = el('#ppfTable tbody');
+    const canvas = el('#ppfCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let extraPoints = [];
+
+    function buildTable(){
+      const n = Math.max(2, Math.min(24, parseInt(el('#nPairs').value || '4', 10)));
+      const mode = el('#labelsMode').value;
+      tbody.innerHTML = '';
+      for(let i=0;i<n;i++){
+        const label = mode === 'numeric' ? (i+1) : greekLabels[i] || (i+1);
+        // Συνδυασμός γραμμή
+        const tr = document.createElement('tr');
+        tr.dataset.type = 'combo';
+        tr.dataset.index = i;
+        tr.innerHTML = `
+          <td><strong>${label}</strong></td>
+          <td><input type="number" step="any" inputmode="decimal" placeholder="π.χ. 100" aria-label="Χ ${label}"></td>
+          <td><input type="number" step="any" inputmode="decimal" placeholder="π.χ. 600" aria-label="Ψ ${label}"></td>
+          <td class="cell-readonly">—</td>
+          <td class="cell-readonly">—</td>
+        `;
+        tbody.appendChild(tr);
+
+        // Γραμμή ΚΕ ανάμεσα σε i και i+1
+        if(i < n-1){
+          const nextLabel = mode === 'numeric' ? (i+2) : (greekLabels[i+1] || (i+2));
+          const keTr = document.createElement('tr');
+          keTr.className = 'keline';
+          keTr.dataset.type = 'ke';
+          keTr.dataset.between = i; // ανάμεσα στο i και στο i+1
+          keTr.innerHTML = `
+            <td>ΚΕ ${label}${nextLabel}</td>
+            <td class="cell-readonly">—</td>
+            <td class="cell-readonly">—</td>
+            <td><input type="number" step="any" inputmode="decimal" placeholder="ΔΨ/ΔΧ" aria-label="ΚΕχ ${label}${nextLabel}"></td>
+            <td><input type="number" step="any" inputmode="decimal" placeholder="ΔΧ/ΔΨ" aria-label="ΚΕψ ${label}${nextLabel}"></td>
+          `;
+          tbody.appendChild(keTr);
+        }
+      }
+      clearCanvas();
+      extraPoints = [];
+      el('#classifyMsg').textContent = '';
+    }
+
+    function readNum(input){
+      if(!input) return null;
+      const val = (typeof input === 'string') ? input : input.value;
+      if(val==='' || val==null) return null;
+      const n = parseFloat(String(val).replace(',', '.'));
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function parseCombos(includeInputs=false){
+      return els('tr[data-type="combo"]', tbody).map(tr => {
+        const label = tr.children[0].innerText.trim();
+        const xIn = tr.children[1].querySelector('input');
+        const yIn = tr.children[2].querySelector('input');
+        const x = readNum(xIn);
+        const y = readNum(yIn);
+        return includeInputs? { label, x, y, tr, xIn, yIn } : { label, x, y, tr };
+      });
+    }
+
+    function parseKE(i){
+      const keRow = el(`tr[data-type="ke"][data-between="${i}"]`);
+      if(!keRow) return {kex:null, kepsi:null, kexIn:null, kepsiIn:null};
+      const kexIn = keRow.children[3].querySelector('input');
+      const kepsiIn = keRow.children[4].querySelector('input');
+      return { kex: readNum(kexIn), kepsi: readNum(kepsiIn), kexIn, kepsiIn };
+    }
+
+    function setIfEmpty(input, value){
+      if(input && readNum(input) == null && value!=null && isFinite(value)){
+        input.value = tidy(value);
+        return true;
+      }
+      return false;
+    }
+
+    // Συμπλήρωση άγνωστων Χ/Ψ χρησιμοποιώντας ΚΕ μεταξύ γειτονικών γραμμών
+    function fillMissingFromKE(){
+      let changed = true, iterations = 0;
+      while(changed && iterations < 20){
+        iterations++; changed = false;
+        const combos = parseCombos(true);
+        for(let i=0;i<combos.length-1;i++){
+          const a = combos[i];
+          const b = combos[i+1];
+          const {kex, kepsi, kexIn, kepsiIn} = parseKE(i);
+          const kx = (kex!=null && isFinite(kex)) ? kex : null;
+          const kp = (kepsi!=null && isFinite(kepsi)) ? kepsi : null;
+
+          // Αν έχουμε πλήρη πληροφορία Χ/Ψ, συμπλήρωσε ΚΕ αν λείπουν
+          if(a.x!=null && a.y!=null && b.x!=null && b.y!=null){
+            const dX = b.x - a.x, dY = b.y - a.y;
+            setIfEmpty(kexIn, Math.abs(dY/(dX||NaN)));
+            setIfEmpty(kepsiIn, Math.abs(dX/(dY||NaN)));
+            continue;
+          }
+
+          // Υποθέτουμε ΚΠΔ με Χ↑ και Ψ↓: ΔΧ και ΔΨ έχουν αντίθετο πρόσημο
+          // Προσπάθεια 1: γνωστά a.x,a.y και b.y => βρες b.x
+          if(a.x!=null && a.y!=null && b.y!=null && b.x==null && (kx!=null || kp!=null)){
+            const dY = b.y - a.y;
+            const dXmag = (kx!=null) ? Math.abs(dY)/(kx||Infinity) : Math.abs(dY)*(kp||0);
+            const signDX = (dY<=0)? +1 : -1; // αντίθετο του dY
+            const bx = a.x + signDX*dXmag;
+            if(setIfEmpty(b.xIn, bx)) changed = true;
+          }
+          // Προσπάθεια 2: γνωστά a.x,a.y και b.x => βρες b.y
+          if(a.x!=null && a.y!=null && b.x!=null && b.y==null && (kx!=null || kp!=null)){
+            const dX = b.x - a.x;
+            const dYmag = (kx!=null) ? Math.abs(dX)*(kx||0) : Math.abs(dX)/(kp||Infinity);
+            const signDY = (dX>=0)? -1 : +1; // αντίθετο του dX
+            const by = a.y + signDY*dYmag;
+            if(setIfEmpty(b.yIn, by)) changed = true;
+          }
+          // Προσπάθεια 3: ανάποδα (γνωστό b, βρες a)
+          if(b.x!=null && b.y!=null && a.y!=null && a.x==null && (kx!=null || kp!=null)){
+            const dY = b.y - a.y; // a.x άγνωστο, αλλά dY γνωστό
+            const dXmag = (kx!=null) ? Math.abs(dY)/(kx||Infinity) : Math.abs(dY)*(kp||0);
+            const signDX = (dY<=0)? +1 : -1; // αντίθετο του dY
+            const ax = b.x - signDX*dXmag;
+            if(setIfEmpty(a.xIn, ax)) changed = true;
+          }
+          if(b.x!=null && b.y!=null && a.x!=null && a.y==null && (kx!=null || kp!=null)){
+            const dX = b.x - a.x;
+            const dYmag = (kx!=null) ? Math.abs(dX)*(kx||0) : Math.abs(dX)/(kp||Infinity);
+            const signDY = (dX>=0)? -1 : +1;
+            const ay = b.y - signDY*dYmag;
+            if(setIfEmpty(a.yIn, ay)) changed = true;
+          }
+        }
+      }
+    }
+
+    function computeOpportunityCosts(){
+      const rows = parseCombos(true);
+      for(let i=0;i<rows.length-1;i++){
+        const a = rows[i], b = rows[i+1];
+        const {kex, kepsi, kexIn, kepsiIn} = parseKE(i);
+        if(a.x!=null && a.y!=null && b.x!=null && b.y!=null){
+          const dX = b.x - a.x; const dY = b.y - a.y;
+          if(readNum(kexIn) == null && dX!==0) kexIn.value = tidy(Math.abs(dY/dX));
+          if(readNum(kepsiIn) == null && dY!==0) kepsiIn.value = tidy(Math.abs(dX/dY));
+        }
+      }
+    }
+
+    function tidy(num){
+      if(!isFinite(num)) return '';
+      const abs = Math.abs(num);
+      if(abs===0) return '0';
+      if(abs>=1000) return num.toFixed(2);
+      if(abs>=1) return Number(num.toFixed(4)).toString();
+      return Number(num.toPrecision(3)).toString();
+    }
+
+    function getPPFPoints(){
+      const rows = parseCombos();
+      const pts = rows.filter(r=>r.x!=null && r.y!=null).map(r=>({label:r.label, chi:r.x, psi:r.y}));
+      pts.sort((a,b)=>a.psi - b.psi); // οριζόντιος Ψ
+      return pts;
+    }
+
+    function drawPPF(){
+      const pts = getPPFPoints();
+      clearCanvas();
+      if(pts.length < 2){ drawMessage('Συμπλήρωσε τουλάχιστον δύο σημεία (Χ, Ψ).'); return; }
+      const maxPsi = Math.max(...pts.map(p=>p.psi));
+      const maxChi = Math.max(...pts.map(p=>p.chi));
+      const margin = {l:64, r:24, t:24, b:64};
+      const W = canvas.width, H = canvas.height;
+
+      ctx.save();
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = 'rgba(148,163,184,.6)';
+      // Άξονες: οριζόντιος Ψ, κάθετος Χ
+      line(margin.l, H-margin.b, W-margin.r, H-margin.b);
+      line(margin.l, H-margin.b, margin.l, margin.t);
+      ctx.font = '12px system-ui, -apple-system, Segoe UI, Roboto';
+      ctx.fillStyle = 'rgba(203,213,225,.9)';
+      ctx.fillText('Ψ', W-margin.r-10, H-margin.b+28);
+      ctx.fillText('Χ', margin.l-18, margin.t+10);
+
+      drawTicks(maxPsi, maxChi, margin, W, H);
+
+      // Καμπύλη
+      ctx.lineWidth = 2.5; ctx.strokeStyle = '#38bdf8';
+      ctx.beginPath();
+      pts.forEach((p,i)=>{
+        const {px, py} = map(p.psi, p.chi, maxPsi, maxChi, margin, W, H);
+        if(i===0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      });
+      ctx.stroke();
+
+      // Σημεία + ετικέτες
+      ctx.fillStyle = '#22c55e';
+      pts.forEach(p=>{
+        const {px, py} = map(p.psi, p.chi, maxPsi, maxChi, margin, W, H);
+        ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = 'rgba(224,242,254,.95)';
+        ctx.font = 'bold 12px system-ui';
+        ctx.fillText(p.label, px+6, py-6);
+        ctx.fillStyle = '#22c55e';
+      });
+
+      // Πρόσθετα σημεία
+      extraPoints.forEach(e => {
+        const {px, py} = map(e.psi, e.chi, maxPsi, maxChi, margin, W, H);
+        let color = '#a78bfa'; // εφικτός (εντός)
+        if(e.class === 'μέγιστος') color = '#facc15';
+        if(e.class === 'ανέφικτος') color = '#ef4444';
+        ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill();
+        ctx.fillStyle = 'rgba(224,242,254,.95)';
+        ctx.font = 'bold 12px system-ui';
+        ctx.fillText(e.label, px+7, py-7);
+      });
+
+      ctx.restore();
+    }
+
+    function drawTicks(maxX, maxY, margin, W, H){
+      const nx = 5, ny = 5; // μέχρι 5 χαράξεις
+      const stepX = (W - margin.l - margin.r) / nx;
+      const stepY = (H - margin.t - margin.b) / ny;
+      for(let i=1;i<=nx;i++){
+        const x = margin.l + i*stepX;
+        line(x, H-margin.b-4, x, H-margin.b+4);
+        const val = (maxX * i/nx);
+        drawText(tidy(val), x-8, H-margin.b+18);
+      }
+      for(let j=1;j<=ny;j++){
+        const y = H-margin.b - j*stepY;
+        line(margin.l-4, y, margin.l+4, y);
+        const val = (maxY * j/ny);
+        drawText(tidy(val), margin.l-46, y+4);
+      }
+    }
+
+    function drawText(text, x, y){
+      ctx.save();
+      ctx.fillStyle = 'rgba(148,163,184,.9)';
+      ctx.font = '11px system-ui, -apple-system, Segoe UI, Roboto';
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function line(x1,y1,x2,y2){ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
+
+    function map(h, v, maxH, maxV, margin, W, H){
+      // h -> οριζόντιος (Ψ), v -> κατακόρυφος (Χ)
+      const px = margin.l + (h/maxH) * (W - margin.l - margin.r);
+      const py = H - margin.b - (v/maxV) * (H - margin.t - margin.b);
+      return {px, py};
+    }
+
+    function drawMessage(msg){
+      ctx.save();
+      ctx.fillStyle = 'rgba(148,163,184,.9)';
+      ctx.font = '14px system-ui, -apple-system, Segoe UI, Roboto';
+      ctx.fillText(msg, 24, canvas.height-20);
+      ctx.restore();
+    }
+
+    function clearCanvas(){
+      ctx.fillStyle = '#0b1220';
+      ctx.fillRect(0,0,canvas.width, canvas.height);
+    }
+
+    // Ταξινόμηση & Ταξινόμηση σημείου ως εφικτό/μέγιστο/ανέφικτο
+    function classifyPoint(psi, chi){
+      const pts = getPPFPoints();
+      if(pts.length < 2) return {status:'χωρίς ΚΠΔ', frontier: null};
+      // εξασφάλιση ταξινόμησης κατά Ψ
+      pts.sort((a,b)=>a.psi-b.psi);
+      const minPsi = pts[0].psi, maxPsi = pts[pts.length-1].psi;
+      // βρες τμήμα
+      let i = 0;
+      if(psi <= minPsi){ i = 0; }
+      else if(psi >= maxPsi){ i = pts.length-2; }
+      else {
+        for(let k=0;k<pts.length-1;k++){
+          if(psi >= pts[k].psi && psi <= pts[k+1].psi){ i = k; break; }
+        }
+      }
+      const a = pts[i], b = pts[i+1];
+      // γραμμική (ή μικρή εξωτράπ) παρεμβολή στο Χ ως προς Ψ
+      const t = (psi - a.psi) / (b.psi - a.psi);
+      const chiFrontier = a.chi + (b.chi - a.chi) * t;
+      const rangeChi = Math.max(...pts.map(p=>p.chi)) - Math.min(...pts.map(p=>p.chi));
+      const eps = Math.max(1e-6, 0.01 * (rangeChi || 1));
+      if(chi > chiFrontier + eps) return {status:'ανέφικτος', frontier: chiFrontier};
+      if(Math.abs(chi - chiFrontier) <= eps) return {status:'μέγιστος', frontier: chiFrontier};
+      return {status:'εφικτός', frontier: chiFrontier};
+    }
+
+    // Buttons
+    el('#buildBtn').addEventListener('click', buildTable);
+    el('#calcBtn').addEventListener('click', () => {
+      fillMissingFromKE();
+      computeOpportunityCosts();
+      drawPPF();
+    });
+    el('#resetBtn').addEventListener('click', () => {
+      el('#nPairs').value = 4; el('#labelsMode').value = 'greek';
+      buildTable();
+    });
+
+    el('#addPointBtn').addEventListener('click', () => {
+      const name = (el('#extraName').value || 'Κ').trim();
+      const chi = readNum(el('#extraChi'));
+      const psi = readNum(el('#extraPsi'));
+      if(chi==null || psi==null){
+        el('#classifyMsg').textContent = 'Δώσε αριθμητικές τιμές για Χ και Ψ.';
+        return;
+      }
+      const c = classifyPoint(psi, chi);
+      extraPoints.push({label:name, chi, psi, class:c.status});
+      drawPPF();
+      el('#classifyMsg').textContent = `${name}(${`Χ=${tidy(chi)}`}, ${`Ψ=${tidy(psi)}`}) → ${c.status}` + (c.frontier!=null? ` (όριο Χ≈${tidy(c.frontier)} για αυτό το Ψ)` : '');
+    });
+    el('#clearExtraBtn').addEventListener('click', () => {
+      extraPoints = []; el('#classifyMsg').textContent=''; drawPPF();
+    });
+
+    // Init
+    buildTable();
+  </script>
+</body>
+</html>
