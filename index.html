@@ -164,6 +164,15 @@ button[aria-expanded="true"] .chev{transform:rotate(225deg);}
     <section id="apps" class="container">
       <h2>Διαδραστικές εφαρμογές</h2>
       <div class="links">
+        <script>
+          (function () {
+            var p = location.pathname;
+            if (p.endsWith('/index.html')) {
+              var clean = p.slice(0, -'index.html'.length);
+              history.replaceState(null, '', clean + location.search + location.hash);
+            }
+          })();
+      </script>
         <a class="btn" href="https://www.aoth4u.org/ppf/" target="_blank" rel="noopener noreferrer">K.E. και Κ.Π.Δ.</a>
         <a class="btn" href="https://chrimpen.github.io/Supply-Demand/" target="_blank" rel="noopener noreferrer">Αγορά: Προσφορά &amp; Ζήτηση</a>
       </div>
