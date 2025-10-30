@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Προσφορά &amp; Ζήτηση — Multi</title>
+<style>
+  :root { --bg:#0b0b0c; --card:#15161a; --text:#e7e9ee; --muted:#9aa3af; --grid:#475569; }
+  html,body { margin:0; padding:0; background:var(--bg); color:var(--text); font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
+  .wrap { max-width:1140px; margin: 20px auto; padding: 0 16px; }
+  .grid { display:grid; grid-template-columns: 1.2fr 0.8fr; gap:16px; }
+  .panel { background:var(--card); border-radius:16px; padding:16px; box-shadow:0 6px 24px rgba(0,0,0,.25); }
+  .panel h2 { margin:0 0 10px; font-size:16px; }
+  svg { width:100%; height:auto; display:block; }
+  .legend { display:flex; gap:12px; flex-wrap:wrap; margin-top:8px; font-size:12px; color:var(--muted); }
+  .legend span { display:inline-flex; align-items:center; gap:6px; }
+  .dot { width:10px; height:10px; border-radius:50%; background:currentColor; display:inline-block; }
+  .note { margin-top:10px; color:var(--muted); min-height:1em; }
+
+  .controls h3 { margin:14px 0 6px; font-size:14px; color:#cbd5e1; }
+  .row { display:flex; gap:8px; align-items:center; }
+  .col2 { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+  .pair { display:grid; grid-template-columns: 1fr 120px 1fr; align-items:center; gap:8px; margin:6px 0; }
+  .pair label{ color:var(--muted); font-size:12px; }
+  input[type="range"] { width:100%; height:28px; }
+  input[type="number"], select, textarea { width:100%; background:#1f2128; border:1px solid #2a2d36; color:#e7e9ee; border-radius:10px; padding:10px 12px; font-size:14px; }
+  input:disabled, textarea:disabled, select:disabled { opacity:.55; cursor:not-allowed; }
+  textarea { min-height:76px; resize:vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace; font-size:12px; }
+  .btn { padding:10px 12px; border-radius:10px; background:#1f2128; color:#e7e9ee; border:1px solid #2a2d36; cursor:pointer;}
+  .btn:hover{ background:#242732; }
+  .help { color:var(--muted); font-size:12px; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:999px; background:#1f2128; border:1px solid #2a2d36; margin-left:6px; font-size:12px; color:#cbd5e1; }
+  .grid-pts { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+  details.curve { border:1px solid #2a2d36; border-radius:12px; padding:10px; margin:8px 0; }
+  details.curve[open] { background:#181a22; }
+  details.curve > summary { cursor:pointer; list-style:none; font-weight:700; }
+  details.curve > summary::-webkit-details-marker { display:none; }
+  .swatch { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; vertical-align:middle; }
+
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:#cbd5e1; border:1px solid #94a3b8; }
+  input[type="range"]::-moz-range-thumb { width:22px; height:22px; border-radius:50%; background:#cbd5e1; border:1px solid #94a3b8; }
+
+  @media (max-width: 900px){
+    .grid { grid-template-columns: 1fr; }
+    .wrap { margin: 10px auto; }
+    .panel { padding:14px; }
+    .col2 { grid-template-columns: 1fr; }
+    .pair { grid-template-columns: 1fr; }
+    .pair label { font-size:13px; }
+    input[type="number"], select, textarea { font-size:16px; }
+    input[type="range"] { height:34px; }
+    textarea { min-height:96px; }
+    .legend { gap:8px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="grid">
+    <!-- Chart -->
+    <div class="panel">
+      <h2>Προσφορά &amp; Ζήτηση (πολλαπλές καμπύλες)</h2>
+      <svg id="chart" viewBox="0 0 800 520" role="img" aria-label="Διάγραμμα Προσφοράς & Ζήτησης"></svg>
+
+      <div class="legend" id="legend"></div>
+      <div class="note" id="note"></div>
+      <div class="help">Σημ.: Υπολογισμοί ισορροπίας/πολιτικής εφαρμόζονται στο πρώτο ενεργό ζεύγος (D₁ &amp; S₁). Οι υπόλοιπες καμπύλες σχεδιάζονται για σύγκριση.</div>
+    </div>
+
+    <!-- Controls -->
+    <div class="panel controls">
+      <div class="row">
+        <h2 style="flex:1">Ρυθμίσεις</h2>
+        <button class="btn" id="reset">Reset</button>
+      </div>
+
+      <div class="col2">
+        <div>
+          <label class="help">Αριθμός καμπυλών Ζήτησης</label>
+          <select id="dNum">
+            <option value="0">0</option><option value="1" selected>1</option>
+            <option value="2">2</option><option value="3">3</option>
+          </select>
+        </div>
+        <div>
+          <label class="help">Αριθμός καμπυλών Προσφοράς</label>
+          <select id="sNum">
+            <option value="0">0</option><option value="1" selected>1</option>
+            <option value="2">2</option><option value="3">3</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- DEMAND curves -->
+      <h3>Καμπύλες Ζήτησης</h3>
+      <div id="dWrap"></div>
+
+      <!-- SUPPLY curves -->
+      <h3>Καμπύλες Προσφοράς</h3>
+      <div id="sWrap"></div>
+
+      <h3>Πολιτική</h3>
+      <div class="col2">
+        <div>
+          <label class="help">Είδος</label>
+          <select id="policy">
+            <option>Καμία</option>
+            <option>Ανώτατη τιμή</option>
+            <option>Κατώτατη τιμή</option>
+            <option>Φόρος (στους παραγωγούς)</option>
+            <option>Φόρος (στους καταναλωτές)</option>
+            <option>Επιδότηση</option>
+            <option>Ποσόστωση</option>
+          </select>
+        </div>
+        <div>
+          <label class="help">Επίπεδο (φόρος/επιδότηση/όριο)</label>
+          <input id="level" type="number" step="0.5" value="5">
+        </div>
+      </div>
+      <div class="pair"><label>Ποσόστωση Q̄</label><input id="quota_num" type="number" step="1" value="10"><input id="quota" type="range" min="0" max="300" value="10" step="1"></div>
+
+      <h3>Γραμμοσκίαση</h3>
+      <div class="pair">
+        <label>Περιοχή</label>
+        <select id="shade">
+          <option>Τίποτα</option>
+          <option>Συνολική Δαπάνη</option>
+          <option>Συνολικό Έσοδο</option>
+          <option>Κρατική Επιβάρυνση</option>
+          <option>Κρατικά Έσοδα</option>
+        </select>
+        <div></div>
+      </div>
+
+      <div class="help">Mobile-friendly. Οι καμπύλες φτάνουν στα ορατά intercepts. Η υπερβολή ξεκινά στο Q=Qmax.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---------- Utilities ----------
+  const svg = document.getElementById('chart');
+  const note = document.getElementById('note');
+  const legend = document.getElementById('legend');
+
+  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function create(tag, attrs){ const el=document.createElementNS('http://www.w3.org/2000/svg', tag); for(const k in attrs) el.setAttribute(k, attrs[k]); return el; }
+  function clear(el){ while(el.firstChild) el.removeChild(el.firstChild); }
+  function poly(g, pts, color, dash, width=2, opacity=1){ const p = create('polyline',{fill:'none','stroke-width':width,stroke:color,opacity:opacity,points:pts.map(p=>p.join(',')).join(' ')}); if(dash) p.setAttribute('stroke-dasharray', dash); g.appendChild(p); return p; }
+  function vline(g, x, y1, y2, color, dash, width=2, opacity=1){ const l=create('line',{x1:x,y1:y1,x2:x,y2:y2,stroke:color,'stroke-width':width,opacity:opacity}); if(dash) l.setAttribute('stroke-dasharray', dash); g.appendChild(l); return l; }
+  function hline(g, y, x1, x2, color, dash, width=2, opacity=1){ const l=create('line',{x1:x1,y1:y,x2:x2,y2:y,stroke:color,'stroke-width':width,opacity:opacity}); if(dash) l.setAttribute('stroke-dasharray', dash); g.appendChild(l); return l; }
+  function dot(g, x, y, color, r=4, opacity=1){ g.appendChild(create('circle',{cx:x,cy:y,r:r,fill:color,opacity:opacity})); }
+  function text(g, x, y, str, color, size=12, anchor='start'){ const t=create('text',{x:x,y:y,fill:color,'font-size':String(size),'text-anchor':anchor}); t.textContent=str; g.appendChild(t); return t; }
+
+  function parsePairs(text){
+    const lines = text.split(/[\n\r]+/).map(s=>s.trim()).filter(Boolean);
+    const pts = [];
+    for(const ln of lines){
+      const m = ln.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean);
+      if(m.length>=2){
+        const p = parseFloat(m[0]); const q = parseFloat(m[1]);
+        if(isFinite(q) && isFinite(p)) pts.push([p,q]);
+      }
+    }
+    pts.sort((a,b)=>a[0]-b[0]);
+    return pts;
+  }
+  function interp(points){
+    if(points.length===0) return (p)=>NaN;
+    return function(p){
+      if(points.length===1) return points[0][1];
+      if(p<=points[0][0]){ const [x1,y1]=points[0], [x2,y2]=points[1]; const t=(p-x1)/(x2-x1); return y1 + t*(y2-y1); }
+      for(let i=1;i<points.length;i++){ const [x1,y1]=points[i-1], [x2,y2]=points[i]; if(p<=x2){ const t=(p-x1)/(x2-x1); return y1 + t*(y2-y1); } }
+      const L=points.length; const [x1,y1]=points[L-2], [x2,y2]=points[L-1]; const t=(p-x1)/(x2-x1); return y1 + t*(y2-y1);
+    }
+  }
+  function bisect(f, lo, hi, maxIter=80, tol=1e-6){
+    let flo=f(lo), fhi=f(hi); if(!isFinite(flo) || !isFinite(fhi)) return NaN;
+    let it=0;
+    while(flo*fhi>0 && it<16){ hi*=1.8; fhi=f(hi); it++; if(!isFinite(fhi)) break; }
+    if(flo*fhi>0) return NaN;
+    for(let i=0;i<maxIter;i++){ const mid=0.5*(lo+hi); const fm=f(mid); if(!isFinite(fm)) return NaN; if(Math.abs(fm)<tol) return mid; if(flo*fm<=0){ hi=mid; fhi=fm; } else { lo=mid; flo=fm; } }
+    return 0.5*(lo+hi);
+  }
+  function quantile(arr, q){
+    const a = arr.filter(x=>isFinite(x)).slice().sort((x,y)=>x-y);
+    if(a.length===0) return NaN;
+    const idx = (a.length-1)*q;
+    const lo = Math.floor(idx), hi = Math.ceil(idx);
+    if(lo===hi) return a[lo];
+    return a[lo] + (a[hi]-a[lo])*(idx-lo);
+  }
+
+  // ---------- Colors ----------
+  const demandColors = ['#60a5fa', '#3b82f6', '#1d4ed8']; // D1,D2,D3
+  const supplyColors = ['#34d399', '#059669', '#065f46']; // S1,S2,S3
+  const eqColor = '#f59e0b', polColor = '#e879f9';
+
+  // ---------- DOM references ----------
+  const dNumSel = document.getElementById('dNum');
+  const sNumSel = document.getElementById('sNum');
+  const dWrap = document.getElementById('dWrap');
+  const sWrap = document.getElementById('sWrap');
+  const policySel = document.getElementById('policy');
+  const levelInp = document.getElementById('level');
+  const shadeSel = document.getElementById('shade');
+  const quotaNum = document.getElementById('quota_num');
+  const quota = document.getElementById('quota');
+
+  // ---------- Curve UI Builders ----------
+  function demandBlock(i){
+    const idx = i+1;
+    const color = demandColors[i%demandsColorsLength];
+    return `
+<details class="curve" open>
+  <summary><span class="swatch" style="background:${color}"></span> Ζήτηση D_${idx}</summary>
+  <div class="col2">
+    <div>
+      <label class="help">Τύπος D_${idx}</label>
+      <select id="d${idx}_type">
+        <option value="linear">Γραμμική (Q = a + bP)</option>
+        <option value="hyper">Υπερβολική (Q = A / P)</option>
+        <option value="points">Από σημεία (P,Q)</option>
+      </select>
+    </div>
+    <div>
+      <label class="help">Σημεία (αν επιλεγεί)</label>
+      <textarea id="d${idx}_pts" spellcheck="false">0, 80
+10, 30
+20, 10
+30, 5
+40, 3</textarea>
+    </div>
+  </div>
+  <div class="pair"><label>a (σταθερός όρος)</label><input id="d${idx}_a_num" type="number" step="1" value="50"><input id="d${idx}_a" type="range" min="-200" max="200" value="50" step="1"></div>
+  <div class="pair"><label>b (συντελεστής P)</label><input id="d${idx}_b_num" type="number" step="0.1" value="-2"><input id="d${idx}_b" type="range" min="-10" max="0" value="-2" step="0.1"></div>
+  <div class="pair"><label>A (για Q=A/P)</label><input id="d${idx}_A_num" type="number" step="1" value="200"><input id="d${idx}_A" type="range" min="1" max="1000" value="200" step="1"></div>
+  <div class="help">Sliders: <strong>b ≤ 0</strong>. Οι αριθμητικοί δέχονται οποιαδήποτε τιμή.</div>
+</details>`;
+  }
+
+  function supplyBlock(i){
+    const idx = i+1;
+    const color = supplyColors[i%supplyColorsLength];
+    return `
+<details class="curve" open>
+  <summary><span class="swatch" style="background:${color}"></span> Προσφορά S_${idx}</summary>
+  <div class="col2">
+    <div>
+      <label class="help">Τύπος S_${idx}</label>
+      <select id="s${idx}_type">
+        <option value="linear">Γραμμική (Q = c + dP)</option>
+        <option value="points">Από σημεία (P,Q)</option>
+      </select>
+    </div>
+    <div>
+      <label class="help">Σημεία (αν επιλεγεί)</label>
+      <textarea id="s${idx}_pts" spellcheck="false">0, 0
+10, 5
+20, 12
+30, 20
+40, 28</textarea>
+    </div>
+  </div>
+  <div class="pair"><label>c (σταθερός όρος)</label><input id="s${idx}_c_num" type="number" step="1" value="-10"><input id="s${idx}_c" type="range" min="-200" max="200" value="-10" step="1"></div>
+  <div class="pair"><label>d (συντελεστής P)</label><input id="s${idx}_d_num" type="number" step="0.01" value="1"><input id="s${idx}_d" type="range" min="0" max="10" value="1" step="0.01"></div>
+  <div class="help">Sliders: <strong>d ≥ 0</strong>. Οι αριθμητικοί δέχονται οποιαδήποτε τιμή.</div>
+</details>`;
+  }
+
+  const demandsColorsLength = demandColors.length;
+  const supplyColorsLength = supplyColors.length;
+
+  function buildCurveUIs(){
+    const dn = +dNumSel.value|0, sn = +sNumSel.value|0;
+    dWrap.innerHTML = Array.from({length:dn}, (_,i)=> demandBlock(i)).join('');
+    sWrap.innerHTML = Array.from({length:sn}, (_,i)=> supplyBlock(i)).join('');
+    wireCurveInputs();
+  }
+
+  function syncPair(rangeId, numId){
+    const r=document.getElementById(rangeId), n=document.getElementById(numId);
+    if(!r||!n) return;
+    r.addEventListener('input', ()=>{ n.value=r.value; draw(); });
+    n.addEventListener('input', ()=> draw());
+  }
+
+  function enableDisableForCurve(prefix){
+    const type = document.getElementById(prefix+'_type').value;
+    const isDemand = prefix.startsWith('d');
+    const a = document.getElementById(prefix+(isDemand?'_a':'')), an = document.getElementById(prefix+(isDemand?'_a_num':''));
+    const b = document.getElementById(prefix+(isDemand?'_b':'')), bn = document.getElementById(prefix+(isDemand?'_b_num':''));
+    const A = document.getElementById(prefix+(isDemand?'_A':'')), An = document.getElementById(prefix+(isDemand?'_A_num':''));
+    const c = document.getElementById(prefix+(isDemand?'':'_c')), cn = document.getElementById(prefix+(isDemand?'':'_c_num'));
+    const d = document.getElementById(prefix+(isDemand?'':'_d')), dn = document.getElementById(prefix+(isDemand?'':'_d_num'));
+    const ptsBox = document.getElementById(prefix+'_pts');
+
+    if(isDemand){
+      const linear = (type==='linear'), hyper=(type==='hyper');
+      if(a&&an) a.disabled = an.disabled = !linear;
+      if(b&&bn) b.disabled = bn.disabled = !linear;
+      if(A&&An) A.disabled = An.disabled = !hyper;
+      if(ptsBox) ptsBox.disabled = (type!=='points');
+    } else {
+      const linear=(type==='linear');
+      if(c&&cn) c.disabled = cn.disabled = !linear;
+      if(d&&dn) d.disabled = dn.disabled = !linear;
+      if(ptsBox) ptsBox.disabled = (type!=='points');
+    }
+  }
+
+  function wireCurveInputs(){
+    const dn = +dNumSel.value|0, sn = +sNumSel.value|0;
+    for(let i=1;i<=dn;i++){
+      // types & textareas
+      document.getElementById(`d${i}_type`).addEventListener('change', ()=>{ enableDisableForCurve(`d${i}`); draw(); });
+      document.getElementById(`d${i}_pts`).addEventListener('input', draw);
+      // sliders
+      syncPair(`d${i}_a`, `d${i}_a_num`);
+      syncPair(`d${i}_b`, `d${i}_b_num`);
+      syncPair(`d${i}_A`, `d${i}_A_num`);
+      enableDisableForCurve(`d${i}`);
+    }
+    for(let i=1;i<=sn;i++){
+      document.getElementById(`s${i}_type`).addEventListener('change', ()=>{ enableDisableForCurve(`s${i}`); draw(); });
+      document.getElementById(`s${i}_pts`).addEventListener('input', draw);
+      syncPair(`s${i}_c`, `s${i}_c_num`);
+      syncPair(`s${i}_d`, `s${i}_d_num`);
+      enableDisableForCurve(`s${i}`);
+    }
+  }
+
+  // ---------- Global controls ----------
+  document.getElementById('reset').addEventListener('click', ()=>{
+    dNumSel.value = '1'; sNumSel.value = '1';
+    buildCurveUIs();
+    policySel.value = 'Καμία'; levelInp.value = 5; shadeSel.value='Τίποτα';
+    quotaNum.value = 10; quota.value = 10;
+    draw();
+  });
+
+  dNumSel.addEventListener('change', ()=>{ buildCurveUIs(); draw(); });
+  sNumSel.addEventListener('change', ()=>{ buildCurveUIs(); draw(); });
+
+  policySel.addEventListener('change', draw);
+  levelInp.addEventListener('input', draw);
+  shadeSel.addEventListener('change', draw);
+  quota.addEventListener('input', ()=>{ quotaNum.value=quota.value; draw(); });
+  quotaNum.addEventListener('input', draw);
+
+  window.addEventListener('resize', draw);
+  window.addEventListener('error', (e)=>{ note.style.color='#ef4444'; note.textContent='Σφάλμα JavaScript: '+e.message; });
+
+  // ---------- Math engines ----------
+  const PADL=60, PADB=60, PADR=60, PADT=60, W=800, H=520;
+
+  function scale(qmax, pmax){
+    const x = q => PADL + (q/qmax)*(W-PADL-PADR);
+    const y = p => H-PADB - (p/pmax)*(H-PADT-PADB);
+    return {x,y};
+  }
+
+  function drawAxes(g, sc, qmax, pmax){
+    const isNarrow = window.innerWidth <= 900;
+    const ticks = isNarrow ? 4 : 6;
+    g.appendChild(create('line',{x1:PADL,y1:H-PADB,x2:W-PADR,y2:H-PADB,stroke:cssVar('--grid')}));
+    g.appendChild(create('line',{x1:PADL,y1:H-PADB,x2:PADL,y2:PADT,stroke:cssVar('--grid')}));
+    for(let i=0;i<=ticks;i++){
+      const q=qmax*i/ticks, x=sc.x(q);
+      g.appendChild(create('line',{x1:x,y1:H-PADB,x2:x,y2:H-PADB+6,stroke:cssVar('--grid')}));
+      const t = create('text',{x:x, y:H-PADB+20, 'text-anchor':'middle', fill:cssVar('--muted'),'font-size': isNarrow ? '11':'12'});
+      t.textContent = q.toFixed(0); g.appendChild(t);
+    }
+    for(let i=0;i<=ticks;i++){
+      const p=pmax*i/ticks, y=sc.y(p);
+      g.appendChild(create('line',{x1:PADL-6,y1:y,x2:PADL,y2:y,stroke:cssVar('--grid')}));
+      const t = create('text',{x:PADL-10, y:y+4, 'text-anchor':'end', fill:cssVar('--muted'),'font-size': isNarrow ? '11':'12'});
+      t.textContent = p.toFixed(0); g.appendChild(t);
+    }
+    const qlbl = create('text',{x:(PADL+(W-PADR))/2,y:H-16, 'text-anchor':'middle', fill:cssVar('--text')}); qlbl.textContent='Ποσότητα (Q)';
+    const plbl = create('text',{x:16,y:(PADT+(H-PADB))/2, transform:`rotate(-90 16 ${(PADT+(H-PADB))/2})`, 'text-anchor':'middle', fill:cssVar('--text')}); plbl.textContent='Τιμή (P)';
+    g.appendChild(qlbl); g.appendChild(plbl);
+  }
+
+  function annotateAxes(g, q, p, sc, color){
+    const x = sc.x(q), y = sc.y(p);
+    const eps = 1e-6;
+    vline(g, x + (Math.abs(q)<=eps?10:0), y, sc.y(0), color, '4,4', 1.5, .9);
+    hline(g, y - (Math.abs(p)<=eps?10:0), sc.x(0), x, color, '4,4', 1.5, .9);
+    const tQ = create('text',{x:x + (Math.abs(q)<=eps? 18:0), y:sc.y(0)+18, 'text-anchor':'middle', fill:cssVar('--muted'),'font-size':'12'}); tQ.textContent = `Q=${q.toFixed(2)}`; g.appendChild(tQ);
+    const tP = create('text',{x:PADL-8, y:y - (Math.abs(p)<=eps? 12:4), 'text-anchor':'end', fill:cssVar('--muted'),'font-size':'12'}); tP.textContent = `P=${p.toFixed(2)}`; g.appendChild(tP);
+  }
+
+  function drawCurveSegments(g, Pgrid, QofP, color, sc, qMax, opts={allowZeroCross:true}){
+    let seg = [];
+    function pushPoint(P, Q){ seg.push([sc.x(Q), sc.y(P)]); }
+    function flush(){ if(seg.length>=2){ poly(g, seg, color); } seg=[]; }
+    function intersectQ(P1, Q1, P2, Q2, QB){ const t=(QB-Q1)/(Q2-Q1); return {P:P1 + t*(P2-P1), Q:QB}; }
+    function inRange(Q){ return isFinite(Q) && Q>=0 && Q<=qMax; }
+
+    let prevP=null, prevQ=null, prevIn=false;
+    for(const P of Pgrid){
+      const Q = QofP(P); const currIn = inRange(Q);
+      if(prevP===null){ if(currIn) pushPoint(P,Q); }
+      else{
+        if(prevIn && currIn){ pushPoint(P,Q); }
+        else if(prevIn && !currIn){
+          if(isFinite(Q)){
+            if(Q>qMax && prevQ<=qMax){ const I=intersectQ(prevP,prevQ,P,Q,qMax); pushPoint(I.P,I.Q); flush(); }
+            else if(opts.allowZeroCross && Q<0 && prevQ>=0){ const I=intersectQ(prevP,prevQ,P,Q,0); pushPoint(I.P,I.Q); flush(); }
+            else flush();
+          } else flush();
+        } else if(!prevIn && currIn){
+          if(isFinite(prevQ)){
+            if(prevQ>qMax && Q<=qMax){ const I=intersectQ(prevP,prevQ,P,Q,qMax); pushPoint(I.P,I.Q); pushPoint(P,Q); }
+            else if(opts.allowZeroCross && prevQ<0 && Q>=0){ const I=intersectQ(prevP,prevQ,P,Q,0); pushPoint(I.P,I.Q); pushPoint(P,Q); }
+          } else pushPoint(P,Q);
+        }
+      }
+      prevP=P; prevQ=Q; prevIn=currIn;
+    }
+    flush();
+  }
+
+  // ---------- Build + Draw ----------
+  function getDemandFuncs(){
+    const dn = +dNumSel.value|0;
+    const out = [];
+    for(let i=1;i<=dn;i++){
+      const type = document.getElementById(`d${i}_type`).value;
+      const color = demandColors[(i-1)%demandColors.length];
+      const a = parseFloat(document.getElementById(`d${i}_a_num`).value||'0');
+      const b = parseFloat(document.getElementById(`d${i}_b_num`).value||'-1');
+      const A = Math.max(1e-9, parseFloat(document.getElementById(`d${i}_A_num`).value||'200'));
+      const pts = parsePairs(document.getElementById(`d${i}_pts`).value||'');
+      let Qd, Pd_inv, hyper=false, isLinear=false;
+      if(type==='linear'){ isLinear=true; Qd=(p)=> a + b*p; Pd_inv=(q)=> Math.abs(b)<1e-9? bisect(P=> (a+b*P)-q, 1e-6, 1e6) : (q-a)/b; }
+      else if(type==='hyper'){ hyper=true; Qd=(p)=> A/Math.max(p,1e-6); Pd_inv=(q)=> A/Math.max(q,1e-6); }
+      else { const f=interp(pts); Qd=(p)=> f(p); Pd_inv=(q)=> bisect(P=>f(P)-q, 1e-3, 1e3); }
+      out.push({name:`D_${i}`, color, Q:(p)=>Qd(p), Pinv:(q)=>Pd_inv(q), hyper, isLinear, a,b,A, type});
+    }
+    return out;
+  }
+
+  function getSupplyFuncs(){
+    const sn = +sNumSel.value|0;
+    const out = [];
+    for(let i=1;i<=sn;i++){
+      const type = document.getElementById(`s${i}_type`).value;
+      const color = supplyColors[(i-1)%supplyColors.length];
+      const c = parseFloat(document.getElementById(`s${i}_c_num`).value||'0');
+      const d = parseFloat(document.getElementById(`s${i}_d_num`).value||'1');
+      const pts = parsePairs(document.getElementById(`s${i}_pts`).value||'');
+      let Qs, Ps_inv, isLinear=false;
+      if(type==='linear'){ isLinear=true; Qs=(p)=> c + d*p; Ps_inv=(q)=> Math.abs(d)<1e-9? bisect(P=> (c+d*P)-q, 1e-6, 1e6) : (q-c)/d; }
+      else { const f=interp(pts); Qs=(p)=> f(p); Ps_inv=(q)=> bisect(P=>f(P)-q, 1e-3, 1e3); }
+      out.push({name:`S_${i}`, color, Q:(p)=>Qs(p), Pinv:(q)=>Ps_inv(q), isLinear, c,d, type});
+    }
+    return out;
+  }
+
+  function updateLegend(dems, sups){
+    legend.innerHTML = '';
+    for(const d of dems){
+      const span = document.createElement('span'); span.style.color=d.color;
+      span.innerHTML = `<span class="dot"></span>${d.name}`;
+      legend.appendChild(span);
+    }
+    for(const s of sups){
+      const span = document.createElement('span'); span.style.color=s.color;
+      span.innerHTML = `<span class="dot"></span>${s.name}`;
+      legend.appendChild(span);
+    }
+    const eq = document.createElement('span'); eq.style.color='#f59e0b'; eq.innerHTML='<span class="dot"></span>Ισορροπία'; legend.appendChild(eq);
+    const pol = document.createElement('span'); pol.style.color='#e879f9'; pol.innerHTML='<span class="dot"></span>Πολιτική'; legend.appendChild(pol);
+  }
+
+  function draw(){
+    clear(svg);
+    const dems = getDemandFuncs();
+    const sups = getSupplyFuncs();
+    updateLegend(dems, sups);
+
+    // Determine scale from all active curves
+    // Probe prices & quantities
+    let pMaxSolve = 60;
+    const epsBase = 1e-3;
+    const hyperActive = dems.some(d=>d.hyper);
+    const pProbeStart = hyperActive ? Math.max(1e-3, 0.05*pMaxSolve) : 0;
+    const Nprobe = 300;
+    const PsProbe = Array.from({length:Nprobe+1}, (_,i)=> pProbeStart + (pMaxSolve - pProbeStart)*i/Nprobe);
+    let qCandidates = [];
+    for(const d of dems){
+      for(let i=0;i<PsProbe.length;i++){
+        const qd = d.Q(PsProbe[i]); if(isFinite(qd)) qCandidates.push(qd);
+      }
+      if(d.isLinear){
+        const qInt = d.a; if(isFinite(qInt) && qInt>0) qCandidates.push(qInt);
+        if(Math.abs(d.b)>1e-9){ const pInt = -d.a/d.b; if(isFinite(pInt)&&pInt>0) pMaxSolve = Math.max(pMaxSolve, pInt*1.05); }
+      }
+    }
+    for(const s of sups){
+      for(let i=0;i<PsProbe.length;i++){
+        const qs = s.Q(PsProbe[i]); if(isFinite(qs)) qCandidates.push(qs);
+      }
+      if(s.isLinear){
+        const qInt = s.c; if(isFinite(qInt) && qInt>0) qCandidates.push(qInt);
+        if(Math.abs(s.d)>1e-9){ const pInt = -s.c/s.d; if(isFinite(pInt)&&pInt>0) pMaxSolve = Math.max(pMaxSolve, pInt*1.05); }
+      }
+    }
+
+    // Primary pair for equilibrium/policy: first demand & first supply
+    const D1 = dems[0], S1 = sups[0];
+
+    // Find base equilibrium with D1 & S1
+    let pEq=NaN, qEq=NaN;
+    if(D1 && S1){
+      const f = (p)=> D1.Q(p) - S1.Q(p);
+      let fLo=f(Math.max(epsBase, 0.02*pMaxSolve)), fHi=f(pMaxSolve), it=0;
+      while((!isFinite(fLo) || !isFinite(fHi) || fLo*fHi>0) && it<18){
+        pMaxSolve *= 1.8;
+        fHi = f(pMaxSolve);
+        it++;
+      }
+      const pMinForSolve = Math.max(epsBase, 0.02 * pMaxSolve);
+      pEq = bisect(f, pMinForSolve, pMaxSolve);
+      qEq = isFinite(pEq) ? D1.Q(pEq) : NaN;
+      if(isFinite(qEq)) qCandidates.push(qEq);
+    }
+
+    const policy = policySel.value;
+    const level = Math.max(0, parseFloat(levelInp.value) || 0);
+    const qbar = parseFloat(quotaNum.value);
+    if((policy==='Ανώτατη τιμή' || policy==='Κατώτατη τιμή') && D1 && S1){
+      const qdAt = D1.Q(level), qsAt = S1.Q(level);
+      if(isFinite(qdAt)) qCandidates.push(qdAt);
+      if(isFinite(qsAt)) qCandidates.push(qsAt);
+    }
+    if(policy==='Ποσόστωση'){ qCandidates.push(qbar); }
+
+    // qMax heuristic
+    const baseQQuant = hyperActive ? 0.90 : 0.95;
+    const capQQuant  = hyperActive ? 0.95 : 0.98;
+    let qBase = quantile(qCandidates, baseQQuant);
+    let qCap  = quantile(qCandidates, capQQuant);
+    let qMax = Math.max(1, qBase || 1);
+    if(isFinite(qCap)) qMax = Math.min(qMax, qCap*1.1);
+    const qMed = quantile(qCandidates, 0.50);
+    if(isFinite(qMed) && isFinite(qMax) && qMax>50*qMed){
+      const q95 = quantile(qCandidates, 0.95); if(isFinite(q95)) qMax = Math.min(qMax, q95*1.2);
+    }
+    qMax = Math.max(qMax, ...qCandidates.filter(isFinite));
+    qMax *= 1.10;
+
+    // pMax for plot
+    let pMaxPlot = pMaxSolve;
+    if(policy==='Ανώτατη τιμή' || policy==='Κατώτατη τιμή') pMaxPlot = Math.max(pMaxPlot, level*1.1);
+    if(D1 && D1.isLinear){ const pInt = -D1.a/D1.b; if(isFinite(pInt)&&pInt>0) pMaxPlot = Math.max(pMaxPlot, pInt*1.05); }
+    if(S1 && S1.isLinear){ const pInt = -S1.c/S1.d; if(isFinite(pInt)&&pInt>0) pMaxPlot = Math.max(pMaxPlot, pInt*1.05); }
+    if(policy==='Ποσόστωση' && D1 && S1){
+      const Pc_cand = D1.Pinv(qbar), Pp_cand = S1.Pinv(qbar);
+      if(isFinite(Pc_cand)) pMaxPlot = Math.max(pMaxPlot, Pc_cand*1.05);
+      if(isFinite(Pp_cand)) pMaxPlot = Math.max(pMaxPlot, Pp_cand*1.05);
+    }
+
+    // Draw axes
+    const sc = scale(qMax, pMaxPlot);
+    drawAxes(svg, sc, qMax, pMaxPlot);
+
+    // Draw all curves
+    const N=600;
+    const pStartCommon = hyperActive ? Math.max(1e-3, 0.05*pMaxPlot) : 0;
+    for(const d of dems){
+      let pStartDemand = pStartCommon;
+      if(d.hyper){
+        const pAtQmax = (typeof d.Pinv==='function') ? d.Pinv(qMax) : NaN;
+        if(isFinite(pAtQmax)) pStartDemand = Math.max(pStartDemand, Math.min(pAtQmax, pMaxPlot*0.999));
+      }
+      const Ps = Array.from({length:N+1}, (_,i)=> pStartDemand + (pMaxPlot - pStartDemand)*i/N);
+      drawCurveSegments(svg, Ps, P=>d.Q(P), d.color, sc, qMax, {allowZeroCross: !d.hyper});
+    }
+    for(const s of sups){
+      const Ps = Array.from({length:N+1}, (_,i)=> pStartCommon + (pMaxPlot - pStartCommon)*i/N);
+      drawCurveSegments(svg, Ps, P=>s.Q(P), s.color, sc, qMax, {allowZeroCross: true});
+    }
+
+    // Intercepts dots for linear D1/S1 (visual aid)
+    const intercepts = [];
+    if(D1 && D1.isLinear){
+      const qIntD = D1.a; if(isFinite(qIntD) && qIntD>0) intercepts.push({q:qIntD,p:0,color:D1.color});
+      if(Math.abs(D1.b)>1e-9){ const pIntD = -D1.a/D1.b; if(isFinite(pIntD)&&pIntD>0) intercepts.push({q:0,p:pIntD,color:D1.color}); }
+    }
+    if(S1 && S1.isLinear){
+      const qIntS = S1.c; if(isFinite(qIntS) && qIntS>0) intercepts.push({q:qIntS,p:0,color:S1.color});
+      if(Math.abs(S1.d)>1e-9){ const pIntS = -S1.c/S1.d; if(isFinite(pIntS)&&pIntS>0) intercepts.push({q:0,p:pIntS,color:S1.color}); }
+    }
+    const eps=1e-9;
+    for(const pt of intercepts){
+      if(pt.q>=-eps && pt.p>=-eps && (pt.q>eps || pt.p>eps)){
+        if(pt.q<=qMax+eps && pt.p<=pMaxPlot+eps){
+          dot(svg, sc.x(pt.q), sc.y(pt.p), pt.color, 4);
+          annotateAxes(svg, pt.q, pt.p, sc, pt.color);
+        }
+      }
+    }
+
+    // Equilibrium/policy/shading on D1 & S1
+    let Pc=pEq, Pp=pEq, Qt=qEq;
+    let info = '';
+    if(D1 && S1 && isFinite(pEq)){
+      dot(svg, sc.x(qEq), sc.y(pEq), eqColor, 4.5);
+      annotateAxes(svg, qEq, pEq, sc, eqColor);
+      info += `Ισορροπία (D₁ & S₁): Q*=${qEq.toFixed(2)}, P*=${pEq.toFixed(2)}.`;
+    } else {
+      info += (D1 && S1) ? 'Δεν βρέθηκε ισορροπία στο εύρος τιμών.' : 'Ενεργοποίησε τουλάχιστον 1 ζήτηση & 1 προσφορά.';
+    }
+
+    if(D1 && S1){
+      if(policy==='Ανώτατη τιμή' || policy==='Κατώτατη τιμή'){
+        const pBar = level;
+        hline(svg, sc.y(pBar), sc.x(0), sc.x(qMax), polColor, '6,6');
+        const Qd_at = D1.Q(pBar), Qs_at = S1.Q(pBar);
+        const isBindingCeiling = (policy==='Ανώτατη τιμή') && isFinite(pEq) && pBar < pEq;
+        const isBindingFloor   = (policy==='Κατώτατη τιμή') && isFinite(pEq) && pBar > pEq;
+        const binding = isBindingCeiling || isBindingFloor;
+        if(binding && isFinite(Qd_at) && isFinite(Qs_at)){
+          Qt = Math.max(0, Math.min(Qd_at, Qs_at));
+          Pc = Pp = pBar;
+          dot(svg, sc.x(Qt), sc.y(Pc), polColor, 4); annotateAxes(svg, Qt, Pc, sc, polColor);
+          const x1=sc.x(Math.min(Qd_at,Qs_at)), x2=sc.x(Math.max(Qd_at,Qs_at)), y=sc.y(Pc);
+          hline(svg, y, x1, x2, polColor, null, 4, .9);
+          info += (policy==='Ανώτατη τιμή' ? ' Ανώτατη' : ' Κατώτατη') + ` τιμή (δεσμευτική) P=${pBar.toFixed(2)} → Q_market=${Qt.toFixed(2)}.`;
+          if(policy==='Κατώτατη τιμή'){ info += ` Κόστος αγοράς πλεονάσματος ≈ P×(Q_s−Q_d).`; }
+        } else { Pc = Pp = pEq; Qt = qEq; info += (policy==='Ανώτατη τιμή' ? ' Ανώτατη' : ' Κατώτατη') + ' τιμή μη δεσμευτική.'; }
+      }
+
+      if(policy==='Φόρος (στους παραγωγούς)' || policy==='Φόρος (στους καταναλωτές)'){
+        const t = level;
+        const F = (Pc_)=> D1.Q(Pc_) - S1.Q(Pc_ - (policy==='Φόρος (στους παραγωγούς)'? t : -t));
+        const PcSol = bisect(F, Math.max(hyperActive?1e-3:0, 0.05*pMaxPlot), Math.max(60, pMaxPlot));
+        if(isFinite(PcSol)){
+          Pc = PcSol; Pp = Pc - (policy==='Φόρος (στους παραγωγούς)'? t : -t); Qt = D1.Q(Pc);
+          dot(svg, sc.x(Qt), sc.y(Pc), polColor, 4); annotateAxes(svg, Qt, Pc, sc, polColor);
+          vline(svg, sc.x(Qt), sc.y(Pp), sc.y(Pc), polColor, '3,6');
+          text(svg, sc.x(Qt)+8, (sc.y(Pc)+sc.y(Pp))/2, `Σφήνα = ${Math.abs(t).toFixed(2)}`, polColor, 12, 'start');
+          info += ` Φόρος t=${t.toFixed(2)} → Q=${Qt.toFixed(2)}, P(καταναλωτή)=${Pc.toFixed(2)}, P(παραγωγού)=${Pp.toFixed(2)}.`;
+        } else info += ' Δεν βρέθηκε νέα ισορροπία με τον φόρο.';
+      }
+
+      if(policy==='Επιδότηση'){
+        const s = level;
+        const F = (Pc_)=> D1.Q(Pc_) - S1.Q(Pc_ + s);
+        const PcSol = bisect(F, Math.max(hyperActive?1e-3:0, 0.05*pMaxPlot), Math.max(60, pMaxPlot));
+        if(isFinite(PcSol)){
+          Pc = PcSol; Pp = Pc + s; Qt = D1.Q(Pc);
+          dot(svg, sc.x(Qt), sc.y(Pc), polColor, 4); annotateAxes(svg, Qt, Pc, sc, polColor);
+          text(svg, sc.x(Qt)+8, sc.y(Pc)-8, `Σφήνα = ${s.toFixed(2)}`, polColor, 12, 'start');
+          info += ` Επιδότηση s=${s.toFixed(2)} → Q=${Qt.toFixed(2)}, P(καταναλωτή)=${Pc.toFixed(2)}, P(παραγωγού)=${Pp.toFixed(2)}.`;
+        } else info += ' Δεν βρέθηκε νέα ισορροπία με την επιδότηση.';
+      }
+
+      if(policy==='Ποσόστωση'){
+        vline(svg, sc.x(qbar), sc.y(0), sc.y(pMaxPlot), polColor, '6,6');
+        const Pc_ = D1.Pinv(qbar), Pp_ = S1.Pinv(qbar);
+        if(isFinite(Pc_) && isFinite(Pp_)){
+          Pc = Pc_; Pp = Pp_; Qt = qbar;
+          dot(svg, sc.x(Qt), sc.y(Pc), polColor, 4); annotateAxes(svg, Qt, Pc, sc, polColor);
+          text(svg, sc.x(Qt)+8, sc.y(Pc)-8, `Σφήνα = ${(Pc-Pp).toFixed(2)}`, polColor, 12, 'start');
+          info += ` Ποσόστωση Q̄=${qbar.toFixed(2)} → P(καταναλωτή)=${Pc.toFixed(2)}, P(παραγωγού)=${Pp.toFixed(2)}.`;
+        } else info += ' Δεν βρέθηκαν τιμές στην ποσόστωση (έλεγξε το εύρος P).';
+      }
+    }
+
+    // Shading options with primary pair
+    function shadeRect(sc, qLeft, qRight, pLow, pHigh, fill, opacity){
+      if(!(isFinite(qLeft)&&isFinite(qRight)&&isFinite(pLow)&&isFinite(pHigh))) return;
+      const x1 = sc.x(Math.min(qLeft, qRight));
+      const x2 = sc.x(Math.max(qLeft, qRight));
+      const yTop = sc.y(Math.max(pLow,pHigh));
+      const yBot = sc.y(Math.min(pLow,pHigh));
+      const r = create('rect',{x:x1, y:yTop, width:x2-x1, height:yBot-yTop, fill, opacity});
+      svg.appendChild(r);
+    }
+    function rect0(pHigh, q){
+      if(!(isFinite(pHigh)&&isFinite(q))) return;
+      const yTop=sc.y(pHigh), yBot=sc.y(0), xLeft=sc.x(0), xRight=sc.x(Math.max(0,q));
+      const r=create('rect',{x:xLeft,y:yTop,width:xRight-xLeft,height:yBot-yTop, fill:'#94a3b8', opacity:.25});
+      svg.appendChild(r);
+    }
+    const shade = shadeSel.value;
+    if(D1 && S1 && isFinite(Qt) && Qt>0){
+      if(shade==='Συνολική Δαπάνη' && isFinite(Pc) && Pc>0) rect0(Pc, Qt);
+      if(shade==='Συνολικό Έσοδο' && isFinite(Pp) && Pp>0){
+        let qRev = Qt;
+        if(policy==='Κατώτατη τιμή' && isFinite(level)){
+          const Qd_at = D1.Q(level), Qs_at = S1.Q(level);
+          const isBindingFloor = isFinite(pEq) && level > pEq;
+          if(isBindingFloor && isFinite(Qs_at)) qRev = Math.max(0, Qs_at);
+        }
+        rect0(Pp, qRev);
+      }
+      if(shade==='Κρατικά Έσοδα' && (policy==='Φόρος (στους παραγωγούς)' || policy==='Φόρος (στους καταναλωτές)')){
+        const pLow = Math.min(Pp, Pc), pHigh = Math.max(Pp, Pc);
+        shadeRect(sc, 0, Qt, pLow, pHigh, '#e879f9', .25);
+      }
+      if(shade==='Κρατική Επιβάρυνση'){
+        if(policy==='Επιδότηση'){
+          const pLow = Math.min(Pp, Pc), pHigh = Math.max(Pp, Pc);
+          shadeRect(sc, 0, Qt, pLow, pHigh, '#e879f9', .25);
+        }
+        if(policy==='Κατώτατη τιμή'){
+          const pBar = level;
+          const Qd_at = D1.Q(pBar), Qs_at = S1.Q(pBar);
+          const isBindingFloor = isFinite(pEq) && pBar > pEq;
+          if(isBindingFloor && isFinite(Qd_at) && isFinite(Qs_at) && Qs_at>Qd_at){
+            shadeRect(sc, Qd_at, Qs_at, 0, pBar, '#e879f9', .25);
+          }
+        }
+      }
+    }
+
+    note.textContent = info;
+  }
+
+  // ---------- Init ----------
+  buildCurveUIs();
+  draw();
+})();
+</script>
+</body>
+</html>
