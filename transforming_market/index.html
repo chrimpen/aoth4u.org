@@ -62,7 +62,7 @@
 
       <div class="legend" id="legend"></div>
       <div class="note" id="note"></div>
-      <div class="help">Σημ.: Πολιτικές/σκίαση εφαρμόζονται στο <strong>πρώτο ζεύγος</strong> (D₁ &amp; S₁). Όλες οι ισορροπίες Dᵢ∩Sⱼ εμφανίζονται.</div>
+      <div class="help">Σημ.: Πολιτικές/σκίαση εφαρμόζονται στο <strong>πρώτο ζεύγος</strong> (D₁ &amp; S₁). Όλες οι ισορροπίες Dᵢ∩Sⱼ εμφανίζονται. Ετικέτες στις άκρες κάθε καμπύλης.</div>
     </div>
 
     <!-- Controls -->
@@ -131,7 +131,7 @@
         <div></div>
       </div>
 
-      <div class="help">Mobile-friendly. Ετικέτες στο δεξί άκρο κάθε καμπύλης &amp; διακεκομμένες βοηθητικές μόνο για τα E.</div>
+      <div class="help">Mobile-friendly. Άξονες με «όμορφα» βήματα (1/2/5×10ᵏ), επιπλέον ticks για τομές &amp; ισορροπίες.</div>
     </div>
   </div>
 </div>
@@ -191,6 +191,7 @@
     return a[lo] + (a[hi]-a[lo])*(idx-lo);
   }
 
+  // ----- “Όμορφα” βήματα για άξονες (1,2,5×10^k) -----
   function niceStep(maxVal, desiredTicks){
     const exp = Math.floor(Math.log10(maxVal || 1));
     const base = Math.pow(10, exp);
@@ -214,12 +215,121 @@
     return {max:niceMax, step};
   }
 
-  // ---------- Colors ----------
+  // Build ticks incl. extras (intercepts/equilibria)
+  function buildTicks(max, step, extras){
+    const eps = step/8;
+    const ticks = [];
+    for(let v=0; v<=max+1e-9; v+=step){ ticks.push(+v.toFixed(6)); }
+    for(const e of extras){
+      if(!isFinite(e)) continue;
+      if(e<0 || e>max+1e-9) continue;
+      if(!ticks.some(t => Math.abs(t-e) < eps)) ticks.push(e);
+    }
+    ticks.sort((a,b)=>a-b);
+    return ticks;
+  }
+
+  // Axes with extras
+  function drawAxesUsingNice(qmax, pmax, xExtras=[], yExtras=[]){
+    const isNarrow = window.innerWidth <= 900;
+    const desiredTicks = isNarrow ? 4 : 6;
+
+    const qNice = niceAxis(qmax, desiredTicks);
+    const pNice = niceAxis(pmax, desiredTicks);
+
+    const sc = scale(qNice.max, pNice.max);
+
+    const xTicks = buildTicks(qNice.max, qNice.step, xExtras);
+    const yTicks = buildTicks(pNice.max, pNice.step, yExtras);
+
+    // axes
+    svg.appendChild(create('line',{x1:PADL,y1:H-PADB,x2:W-PADR,y2:H-PADB,stroke:cssVar('--grid')}));
+    svg.appendChild(create('line',{x1:PADL,y1:H-PADB,x2:PADL,y2:PADT,stroke:cssVar('--grid')}));
+
+    // ticks + labels
+    for(const q of xTicks){
+      const x=sc.x(q);
+      svg.appendChild(create('line',{x1:x,y1:H-PADB,x2:x,y2:H-PADB+6,stroke:cssVar('--grid')}));
+      const t = create('text',{x:x, y:H-PADB+20, 'text-anchor':'middle', fill:cssVar('--muted'),'font-size': isNarrow ? '11':'12'});
+      t.textContent = (qNice.step<1 ? q.toFixed(1) : Math.round(q)); svg.appendChild(t);
+    }
+    for(const p of yTicks){
+      const y=sc.y(p);
+      svg.appendChild(create('line',{x1:PADL-6,y1:y,x2:PADL,y2:y,stroke:cssVar('--grid')}));
+      const t = create('text',{x:PADL-10, y:y+4, 'text-anchor':'end', fill:cssVar('--muted'),'font-size': isNarrow ? '11':'12'});
+      t.textContent = (pNice.step<1 ? p.toFixed(1) : Math.round(p)); svg.appendChild(t);
+    }
+
+    // axis labels
+    const qlbl = create('text',{x:(PADL+(W-PADR))/2,y:H-16, 'text-anchor':'middle', fill:cssVar('--text')}); qlbl.textContent='Ποσότητα (Q)';
+    const plbl = create('text',{x:16,y:(PADT+(H-PADB))/2, transform:`rotate(-90 16 ${(PADT+(H-PADB))/2})`, 'text-anchor':'middle', fill:cssVar('--text')}); plbl.textContent='Τιμή (P)';
+    svg.appendChild(qlbl); svg.appendChild(plbl);
+
+    return {sc, qMaxNice:qNice.max, pMaxNice:pNice.max};
+  }
+
+  // Scaling + drawing helpers
+  const PADL=60, PADB=60, PADR=60, PADT=60, W=800, H=520;
+  function scale(qmax, pmax){
+    const x = q => PADL + (q/qmax)*(W-PADL-PADR);
+    const y = p => H-PADB - (p/pmax)*(H-PADT-PADB);
+    return {x,y};
+  }
+
+  function polyCurve(g, Pgrid, QofP, color, sc, qMax, opts={allowZeroCross:true}){
+    let seg = [];
+    function pushPoint(P, Q){ seg.push([sc.x(Q), sc.y(P)]); }
+    function flush(){ if(seg.length>=2){ poly(g, seg, color); } seg=[]; }
+    function intersectQ(P1, Q1, P2, Q2, QB){ const t=(QB-Q1)/(Q2-Q1); return {P:P1 + t*(P2-P1), Q:QB}; }
+    function inRange(Q){ return isFinite(Q) && Q>=0 && Q<=qMax; }
+
+    let lastVisible = null;
+    let prevP=null, prevQ=null, prevIn=false;
+    for(const P of Pgrid){
+      const Q = QofP(P); const currIn = inRange(Q);
+      if(currIn) lastVisible = {P, Q};
+      if(prevP===null){ if(currIn) pushPoint(P,Q); }
+      else{
+        if(prevIn && currIn){ pushPoint(P,Q); }
+        else if(prevIn && !currIn){
+          if(isFinite(Q)){
+            if(Q>qMax && prevQ<=qMax){ const I=intersectQ(prevP,prevQ,P,Q,qMax); pushPoint(I.P,I.Q); flush(); }
+            else if(opts.allowZeroCross && Q<0 && prevQ>=0){ const I=intersectQ(prevP,prevQ,P,Q,0); pushPoint(I.P,I.Q); flush(); }
+            else flush();
+          } else flush();
+        } else if(!prevIn && currIn){
+          if(isFinite(prevQ)){
+            if(prevQ>qMax && Q<=qMax){ const I=intersectQ(prevP,prevQ,P,Q,qMax); pushPoint(I.P,I.Q); pushPoint(P,Q); }
+            else if(opts.allowZeroCross && prevQ<0 && Q>=0){ const I=intersectQ(prevP,prevQ,P,Q,0); pushPoint(I.P,I.Q); pushPoint(P,Q); }
+          } else pushPoint(P,Q);
+        }
+      }
+      prevP=P; prevQ=Q; prevIn=currIn;
+    }
+    flush();
+    return lastVisible; // για label
+  }
+
+  function solveEq(D, S, pGuessMax){
+    const f = (p)=> D.Q(p) - S.Q(p);
+    let pMax = Math.max(60, pGuessMax || 60);
+    let pMin = Math.max(D.hyper ? 1e-3 : 0.02*pMax, 1e-3);
+    let fLo = f(pMin), fHi = f(pMax), it=0;
+    while ((!(isFinite(fLo)&&isFinite(fHi)) || fLo*fHi>0) && it<18){
+      pMax *= 1.8; pMin = Math.max(D.hyper?1e-3:0.02*pMax, 1e-3);
+      fLo = f(pMin); fHi = f(pMax); it++;
+    }
+    if(!(isFinite(fLo)&&isFinite(fHi)) || fLo*fHi>0) return {p:NaN, q:NaN};
+    const p = bisect(f, pMin, pMax);
+    const q = isFinite(p) ? D.Q(p) : NaN;
+    return {p, q};
+  }
+
+  // ---------- Curve UI ----------
   const demandColors = ['#60a5fa', '#3b82f6', '#1d4ed8'];
   const supplyColors = ['#34d399', '#059669', '#065f46'];
-  const eqColor = '#f59e0b';
+  const eqColor = '#f59e0b', polColor = '#e879f9';
 
-  // ---------- DOM refs ----------
   const dNumSel = document.getElementById('dNum');
   const sNumSel = document.getElementById('sNum');
   const dWrap = document.getElementById('dWrap');
@@ -230,7 +340,6 @@
   const quotaNum = document.getElementById('quota_num');
   const quota = document.getElementById('quota');
 
-  // ---------- Curve UI ----------
   function demandBlock(i){
     const idx = i+1, color = demandColors[i%demandColors.length];
     return `
@@ -350,191 +459,18 @@
   window.addEventListener('resize', draw);
   window.addEventListener('error', (e)=>{ note.style.color='#ef4444'; note.textContent='Σφάλμα JavaScript: '+e.message; });
 
-  // ---------- Canvas ----------
-  const PADL=60, PADB=60, PADR=60, PADT=60, W=800, H=520;
-
-  function scale(qmax, pmax){
-    const x = q => PADL + (q/qmax)*(W-PADL-PADR);
-    const y = p => H-PADB - (p/pmax)*(H-PADT-PADB);
-    return {x,y};
-  }
-
-  function niceStep(maxVal, desiredTicks){
-    const exp = Math.floor(Math.log10(maxVal || 1));
-    const base = Math.pow(10, exp);
-    const candidates = [1, 2, 5].map(m => m*base);
-    let best = candidates[0], bestDiff = Infinity;
-    for(const s of candidates){
-      const ticks = Math.ceil(maxVal / s);
-      const diff = Math.abs(ticks - desiredTicks);
-      if(diff < bestDiff) { bestDiff = diff; best = s; }
-    }
-    if (maxVal / best < 1) {
-      const smaller = best/2;
-      if (smaller > 0) best = smaller;
-    }
-    return Math.max(best, 1e-6);
-  }
-  function niceAxis(maxVal, desiredTicks=6){
-    if(!isFinite(maxVal) || maxVal<=0) return {max:1, step:1};
-    const step = niceStep(maxVal, desiredTicks);
-    const niceMax = Math.ceil(maxVal / step) * step;
-    return {max:niceMax, step};
-  }
-
-  // ----- Axis drawing with extra ticks lists -----
-  function buildTicks(max, step, extras){
-    const eps = step/8;
-    const ticks = [];
-    for(let v=0; v<=max+1e-9; v+=step){ ticks.push(+v.toFixed(6)); }
-    for(const e of extras){
-      if(!isFinite(e)) continue;
-      if(e<0 || e>max+1e-9) continue;
-      if(!ticks.some(t => Math.abs(t-e) < eps)) ticks.push(e);
-    }
-    ticks.sort((a,b)=>a-b);
-    return ticks;
-  }
-
-  function drawAxesUsingNice(qmax, pmax, xExtras=[], yExtras=[]){
-    const isNarrow = window.innerWidth <= 900;
-    const desiredTicks = isNarrow ? 4 : 6;
-
-    const qNice = niceAxis(qmax, desiredTicks);
-    const pNice = niceAxis(pmax, desiredTicks);
-
-    const sc = scale(qNice.max, pNice.max);
-
-    const xTicks = buildTicks(qNice.max, qNice.step, xExtras);
-    const yTicks = buildTicks(pNice.max, pNice.step, yExtras);
-
-    svg.appendChild(create('line',{x1:PADL,y1:H-PADB,x2:W-PADR,y2:H-PADB,stroke:cssVar('--grid')}));
-    svg.appendChild(create('line',{x1:PADL,y1:H-PADB,x2:PADL,y2:PADT,stroke:cssVar('--grid')}));
-
-    for(const q of xTicks){
-      const x=sc.x(q);
-      svg.appendChild(create('line',{x1:x,y1:H-PADB,x2:x,y2:H-PADB+6,stroke:cssVar('--grid')}));
-      const t = create('text',{x:x, y:H-PADB+20, 'text-anchor':'middle', fill:cssVar('--muted'),'font-size': isNarrow ? '11':'12'});
-      t.textContent = (qNice.step<1 ? q.toFixed(1) : Math.round(q)); svg.appendChild(t);
-    }
-    for(const p of yTicks){
-      const y=sc.y(p);
-      svg.appendChild(create('line',{x1:PADL-6,y1:y,x2:PADL,y2:y,stroke:cssVar('--grid')}));
-      const t = create('text',{x:PADL-10, y:y+4, 'text-anchor':'end', fill:cssVar('--muted'),'font-size': isNarrow ? '11':'12'});
-      t.textContent = (pNice.step<1 ? p.toFixed(1) : Math.round(p)); svg.appendChild(t);
-    }
-
-    const qlbl = create('text',{x:(PADL+(W-PADR))/2,y:H-16, 'text-anchor':'middle', fill:cssVar('--text')}); qlbl.textContent='Ποσότητα (Q)';
-    const plbl = create('text',{x:16,y:(PADT+(H-PADB))/2, transform:`rotate(-90 16 ${(PADT+(H-PADB))/2})`, 'text-anchor':'middle', fill:cssVar('--text')}); plbl.textContent='Τιμή (P)';
-    svg.appendChild(qlbl); svg.appendChild(plbl);
-
-    return {sc, qMaxNice:qNice.max, pMaxNice:pNice.max};
-  }
-
-  function polyCurve(g, Pgrid, QofP, color, sc, qMax, opts={allowZeroCross:true}){
-    let seg = [];
-    function pushPoint(P, Q){ seg.push([sc.x(Q), sc.y(P)]); }
-    function flush(){ if(seg.length>=2){ poly(g, seg, color); } seg=[]; }
-    function intersectQ(P1, Q1, P2, Q2, QB){ const t=(QB-Q1)/(Q2-Q1); return {P:P1 + t*(P2-P1), Q:QB}; }
-    function inRange(Q){ return isFinite(Q) && Q>=0 && Q<=qMax; }
-
-    let lastVisible = null;
-    let prevP=null, prevQ=null, prevIn=false;
-    for(const P of Pgrid){
-      const Q = QofP(P); const currIn = inRange(Q);
-      if(currIn) lastVisible = {P, Q};
-      if(prevP===null){ if(currIn) pushPoint(P,Q); }
-      else{
-        if(prevIn && currIn){ pushPoint(P,Q); }
-        else if(prevIn && !currIn){
-          if(isFinite(Q)){
-            if(Q>qMax && prevQ<=qMax){ const I=intersectQ(prevP,prevQ,P,Q,qMax); pushPoint(I.P,I.Q); flush(); }
-            else if(opts.allowZeroCross && Q<0 && prevQ>=0){ const I=intersectQ(prevP,prevQ,P,Q,0); pushPoint(I.P,I.Q); flush(); }
-            else flush();
-          } else flush();
-        } else if(!prevIn && currIn){
-          if(isFinite(prevQ)){
-            if(prevQ>qMax && Q<=qMax){ const I=intersectQ(prevP,prevQ,P,Q,qMax); pushPoint(I.P,I.Q); pushPoint(P,Q); }
-            else if(opts.allowZeroCross && prevQ<0 && Q>=0){ const I=intersectQ(prevP,prevQ,P,Q,0); pushPoint(I.P,I.Q); pushPoint(P,Q); }
-          } else pushPoint(P,Q);
-        }
-      }
-      prevP=P; prevQ=Q; prevIn=currIn;
-    }
-    flush();
-    return lastVisible; // για label
-  }
-
-  function solveEq(D, S, pGuessMax){
-    const f = (p)=> D.Q(p) - S.Q(p);
-    let pMax = Math.max(60, pGuessMax || 60);
-    let pMin = Math.max(D.hyper ? 1e-3 : 0.02*pMax, 1e-3);
-    let fLo = f(pMin), fHi = f(pMax), it=0;
-    while ((!(isFinite(fLo)&&isFinite(fHi)) || fLo*fHi>0) && it<18){
-      pMax *= 1.8; pMin = Math.max(D.hyper?1e-3:0.02*pMax, 1e-3);
-      fLo = f(pMin); fHi = f(pMax); it++;
-    }
-    if(!(isFinite(fLo)&&isFinite(fHi)) || fLo*fHi>0) return {p:NaN, q:NaN};
-    const p = bisect(f, pMin, pMax);
-    const q = isFinite(p) ? D.Q(p) : NaN;
-    return {p, q};
-  }
-
-  // ---------- Draw ----------
-  function getDemandFuncs(){
-    const dn = +dNumSel.value|0, out=[];
-    for(let i=1;i<=dn;i++){
-      const type = document.getElementById(`d${i}_type`).value;
-      const color = demandColors[(i-1)%demandColors.length];
-      const a = parseFloat(document.getElementById(`d${i}_a_num`).value||'0');
-      const b = parseFloat(document.getElementById(`d${i}_b_num`).value||'-1');
-      const A = Math.max(1e-9, parseFloat(document.getElementById(`d${i}_A_num`).value||'200'));
-      const pts = parsePairs(document.getElementById(`d${i}_pts`).value||'');
-      let Qd, Pd_inv, hyper=false, isLinear=false;
-      if(type==='linear'){ isLinear=true; Qd=(p)=> a + b*p; Pd_inv=(q)=> Math.abs(b)<1e-9? bisect(P=> (a+b*P)-q, 1e-6, 1e6) : (q-a)/b; }
-      else if(type==='hyper'){ hyper=true; Qd=(p)=> A/Math.max(p,1e-6); Pd_inv=(q)=> A/Math.max(q,1e-6); }
-      else { const f=interp(pts); Qd=(p)=> f(p); Pd_inv=(q)=> bisect(P=>f(P)-q, 1e-3, 1e3); }
-      out.push({name:`D_${i}`, color, Q:(p)=>Qd(p), Pinv:(q)=>Pd_inv(q), hyper, isLinear, a,b,A, type});
-    }
-    return out;
-  }
-  function getSupplyFuncs(){
-    const sn = +sNumSel.value|0, out=[];
-    for(let i=1;i<=sn;i++){
-      const type = document.getElementById(`s${i}_type`).value;
-      const color = supplyColors[(i-1)%supplyColors.length];
-      const c = parseFloat(document.getElementById(`s${i}_c_num`).value||'0');
-      const d = parseFloat(document.getElementById(`s${i}_d_num`).value||'1');
-      const pts = parsePairs(document.getElementById(`s${i}_pts`).value||'');
-      let Qs, Ps_inv, isLinear=false;
-      if(type==='linear'){ isLinear=true; Qs=(p)=> c + d*p; Ps_inv=(q)=> Math.abs(d)<1e-9? bisect(P=> (c+d*P)-q, 1e-6, 1e6) : (q-c)/d; }
-      else { const f=interp(pts); Qs=(p)=> f(p); Ps_inv=(q)=> bisect(P=>f(P)-q, 1e-3, 1e3); }
-      out.push({name:`S_${i}`, color, Q:(p)=>Qs(p), Pinv:(q)=>Ps_inv(q), isLinear, c,d, type});
-    }
-    return out;
-  }
-  function updateLegend(dems, sups){
-    legend.innerHTML = '';
-    for(const d of dems){ const span=document.createElement('span'); span.style.color=d.color; span.innerHTML=`<span class="dot"></span>${d.name}`; legend.appendChild(span); }
-    for(const s of sups){ const span=document.createElement('span'); span.style.color=s.color; span.innerHTML=`<span class="dot"></span>${s.name}`; legend.appendChild(span); }
-    const eq=document.createElement('span'); eq.style.color=eqColor; eq.innerHTML='<span class="dot"></span>Ισορροπία'; legend.appendChild(eq);
-    const pol=document.createElement('span'); pol.style.color='#e879f9'; pol.innerHTML='<span class="dot"></span>Πολιτική'; legend.appendChild(pol);
-  }
-
-  function drawEqGuides(sc,q,p,color,qMax,pMax){
-    if(!(isFinite(q)&&isFinite(p))) return;
-    if(q<0||q>qMax||p<0||p>pMax) return;
-    vline(svg, sc.x(q), sc.y(0), sc.y(p), color, '4,4', 1.5, .9);
-    hline(svg, sc.y(p), sc.x(0), sc.x(q), color, '4,4', 1.5, .9);
-  }
-
+  // ---------- Drawing core ----------
   function draw(){
     clear(svg);
+
+    // scale placeholders (set after bounds)
+    const PADL=60, PADB=60, PADR=60, PADT=60, W=800, H=520;
+
     const dems = getDemandFuncs();
     const sups = getSupplyFuncs();
     updateLegend(dems, sups);
 
-    // --- determine bounds ---
+    // Bounds estimation
     let pMaxSolve = 60;
     const hyperActive = dems.some(d=>d.hyper);
     const pProbeStart = hyperActive ? Math.max(1e-3, 0.05*pMaxSolve) : 0;
@@ -594,8 +530,6 @@
       const qIntS=S1.c; if(isFinite(qIntS)&&qIntS>=0) xExtras.push(qIntS);
       if(Math.abs(S1.d)>1e-9){ const pIntS=-S1.c/S1.d; if(isFinite(pIntS)&&pIntS>=0) yExtras.push(pIntS); }
     }
-
-    // provisional equilibria (for ticks)
     const eqsForTicks=[];
     for(let i=0;i<dems.length;i++){
       for(let j=0;j<sups.length;j++){
@@ -609,13 +543,11 @@
     const axes=drawAxesUsingNice(qMax, pMaxPlot, xExtras, yExtras);
     const sc=axes.sc; qMax=axes.qMaxNice; pMaxPlot=axes.pMaxNice;
 
-    // draw curves and remember rightmost on-plot point for labeling
+    // Draw curves + keep rightmost visible point for labels
     const N=600;
     const pStartCommon = hyperActive ? Math.max(1e-3, 0.05*pMaxPlot) : 0;
-
-    const rightmostPoints=[]; // {x,y,name,color}
-    for(let k=0;k<dems.length;k++){
-      const d=dems[k];
+    const rightmostPoints=[];
+    for(const d of dems){
       let pStart = pStartCommon;
       if(d.hyper){
         const pAtQmax = (typeof d.Pinv==='function') ? d.Pinv(qMax) : NaN;
@@ -627,20 +559,18 @@
         rightmostPoints.push({x:sc.x(last.Q), y:sc.y(last.P), name:d.name, color:d.color});
       }
     }
-    for(let k=0;k<sups.length;k++){
-      const s=sups[k];
+    for(const s of sups){
       const Ps = Array.from({length:N+1}, (_,i)=> pStartCommon + (pMaxPlot - pStartCommon)*i/N);
       const last = polyCurve(svg, Ps, P=>s.Q(P), s.color, sc, qMax, {allowZeroCross: true});
       if(last && last.Q>=0 && last.Q<=qMax && last.P>=0 && last.P<=pMaxPlot){
         rightmostPoints.push({x:sc.x(last.Q), y:sc.y(last.P), name:s.name, color:s.color});
       }
     }
-    // place labels slightly to the right of the last visible point
     for(const p of rightmostPoints){
       text(svg, Math.min(p.x+8, sc.x(qMax)-4), p.y-6, p.name, p.color, 12, 'start');
     }
 
-    // plot intercept dots (no guides)
+    // Intercepts dots
     if(D1?.isLinear){
       const qIntD=D1.a; if(isFinite(qIntD)&&qIntD>=0&&qIntD<=qMax) dot(svg, sc.x(qIntD), sc.y(0), D1.color, 4);
       if(Math.abs(D1.b)>1e-9){ const pIntD=-D1.a/D1.b; if(isFinite(pIntD)&&pIntD>=0&&pIntD<=pMaxPlot) dot(svg, sc.x(0), sc.y(pIntD), D1.color, 4); }
@@ -650,7 +580,7 @@
       if(Math.abs(S1.d)>1e-9){ const pIntS=-S1.c/S1.d; if(isFinite(pIntS)&&pIntS>=0&&pIntS<=pMaxPlot) dot(svg, sc.x(0), sc.y(pIntS), S1.color, 4); }
     }
 
-    // all equilibria (dots + label + dashed guides to axes in E color)
+    // All equilibria + dashed guides to axes
     const eqs=[];
     for (let i=0;i<dems.length;i++){
       for (let j=0;j<sups.length;j++){
@@ -660,117 +590,182 @@
         }
       }
     }
+    function drawEqGuides(sc,q,p,color,qMax,pMax){
+      if(!(isFinite(q)&&isFinite(p))) return;
+      if(q<0||q>qMax||p<0||p>pMax) return;
+      vline(svg, sc.x(q), sc.y(0), sc.y(p), color, '4,4', 1.5, .9);
+      hline(svg, sc.y(p), sc.x(0), sc.x(q), color, '4,4', 1.5, .9);
+    }
     for (const e of eqs){
-      const color = eqColor; // ίδιο χρώμα με τα Ε
-      dot(svg, sc.x(e.q), sc.y(e.p), color, 4.8, 1);
+      dot(svg, sc.x(e.q), sc.y(e.p), eqColor, 4.8, 1);
       text(svg, sc.x(e.q)+6, sc.y(e.p)-6, `E (D${e.i}∩S${e.j})`, '#fcd34d', 11, 'start');
-      drawEqGuides(sc, e.q, e.p, color, qMax, pMaxPlot); // διακεκομμένες προς τους άξονες
+      drawEqGuides(sc, e.q, e.p, eqColor, qMax, pMaxPlot);
     }
 
-   // policies (solid)
-  let Pc=pEq, Pp=pEq, Qt=qEq;
-  const shade = shadeSel.value;
-  
-  // helpers
-  function shadeRect(sc, qLeft, qRight, pLow, pHigh, fill, opacity){
-    if(!(isFinite(qLeft)&&isFinite(qRight)&&isFinite(pLow)&&isFinite(pHigh))) return;
-    const x1 = sc.x(Math.min(qLeft, qRight));
-    const x2 = sc.x(Math.max(qLeft, qRight));
-    const yTop = sc.y(Math.max(pLow,pHigh));
-    const yBot = sc.y(Math.min(pLow,pHigh));
-    svg.appendChild(create('rect',{x:x1, y:yTop, width:x2-x1, height:yBot-yTop, fill, opacity}));
-  }
-  function fillPQ(sc, P, Q, fill, opacity){
-    // ορθογώνιο 0..Q και 0..P
-    if(!(isFinite(P)&&isFinite(Q))) return;
-    const yTop=sc.y(P), yBot=sc.y(0), xLeft=sc.x(0), xRight=sc.x(Math.max(0,Q));
-    svg.appendChild(create('rect',{x:xLeft,y:yTop,width:xRight-xLeft,height:yBot-yTop, fill, opacity}));
-  }
-  function shadeGovBetween(sc, Pc_, Pp_, Qt_, fill, opacity){
-    if(!(isFinite(Pc_)&&isFinite(Pp_)&&isFinite(Qt_)&&Qt_>0)) return;
-    const pLow=Math.min(Pc_,Pp_), pHigh=Math.max(Pc_,Pp_);
-    shadeRect(sc, 0, Qt_, pLow, pHigh, fill, opacity);
-  }
-  
-  // Υπολογισμός Pc, Pp, Qt ανά πολιτική
-  if(D1 && S1 && isFinite(pEq)){
-    if(policy==='Ανώτατη τιμή' || policy==='Κατώτατη τιμή'){
-      const pBar = Math.max(0, parseFloat(levelInp.value)||0);
-      // γραμμή πολιτικής
-      hline(svg, sc.y(pBar), sc.x(0), sc.x(qMax), '#e879f9', null, 2);
-      const Qd_at = D1.Q(pBar), Qs_at = S1.Q(pBar);
-      const binding = (policy==='Ανώτατη τιμή') ? (pBar < pEq) : (pBar > pEq);
-      if(binding && isFinite(Qd_at) && isFinite(Qs_at)){
-        Qt = Math.max(0, Math.min(Qd_at, Qs_at));
-        Pc = Pp = pBar;
-        dot(svg, sc.x(Qt), sc.y(Pc), '#e879f9', 4);
-      } else {
-        // μη δεσμευτική: κρατάμε ισορροπία
-        Pc=pEq; Pp=pEq; Qt=qEq;
-      }
-    }
-    if(policy==='Φόρος (στους παραγωγούς)' || policy==='Φόρος (στους καταναλωτές)'){
-      const t = Math.max(0, parseFloat(levelInp.value)||0);
-      const F = (Pc_)=> D1.Q(Pc_) - S1.Q(Pc_ - (policy==='Φόρος (στους παραγωγούς)'? t : -t));
-      const PcSol = bisect(F, Math.max(hyperActive?1e-3:0, 0.05*pMaxPlot), Math.max(60, pMaxPlot));
-      if(isFinite(PcSol)){
-        Pc = PcSol;
-        Pp = Pc - (policy==='Φόρος (στους παραγωγούς)'? t : -t);
-        Qt = D1.Q(Pc);
-        dot(svg, sc.x(Qt), sc.y(Pc), '#e879f9', 4);
-        // προαιρετική οπτικοποίηση «σφήνας»
-        vline(svg, sc.x(Qt), sc.y(Pp), sc.y(Pc), '#e879f9', null, 2);
-      }
-    }
-    if(policy==='Επιδότηση'){
-      const s = Math.max(0, parseFloat(levelInp.value)||0);
-      const F = (Pc_)=> D1.Q(Pc_) - S1.Q(Pc_ + s);
-      const PcSol = bisect(F, Math.max(hyperActive?1e-3:0, 0.05*pMaxPlot), Math.max(60, pMaxPlot));
-      if(isFinite(PcSol)){
-        Pc = PcSol;
-        Pp = Pc + s;
-        Qt = D1.Q(Pc);
-        dot(svg, sc.x(Qt), sc.y(Pc), '#e879f9', 4);
-      }
-    }
-    if(policy==='Ποσόστωση'){
-      const qbar = Math.max(0, parseFloat(quotaNum.value)||0);
-      vline(svg, sc.x(qbar), sc.y(0), sc.y(pMaxPlot), '#e879f9', null, 2);
-      const Pc_ = D1.Pinv(qbar), Pp_ = S1.Pinv(qbar);
-      if(isFinite(Pc_) && isFinite(Pp_)){
-        Pc=Pc_; Pp=Pp_; Qt=qbar;
-        dot(svg, sc.x(Qt), sc.y(Pc), '#e879f9', 4);
-      }
-    }
-  
-    // ---- ΕΦΑΡΜΟΓΗ ΣΚΙΑΣΗΣ ----
-    if(isFinite(Qt) && Qt>0 && isFinite(Pc) && Pc>=0){
-      if(shade==='Συνολική Δαπάνη'){
-        fillPQ(sc, Pc, Qt, '#94a3b8', .25);
-      } else if(shade==='Συνολικό Έσοδο' && isFinite(Pp) && Pp>=0){
-        fillPQ(sc, Pp, Qt, '#64748b', .25);
-      } else if(shade==='Κρατικά Έσοδα'){
-        // φόρος: έσοδα = |Pc-Pp| * Qt
-        // ποσόστωση: «rents» = |Pc-Pp| * Qt (αν θεωρήσουμε δημοπράτηση)
-        if((policy.includes('Φόρος') || policy==='Ποσόστωση') && isFinite(Pp)){
-          shadeGovBetween(sc, Pc, Pp, Qt, '#e879f9', .25);
-        }
-      } else if(shade==='Κρατική Επιβάρυνση'){
-        // επιδότηση: δημοσιονομικό κόστος = |Pc-Pp| * Qt
-        if(policy==='Επιδότηση' && isFinite(Pp)){
-          shadeGovBetween(sc, Pc, Pp, Qt, '#e879f9', .25);
-        }
-      }
-    }
-  }
+    // ===== POLICIES (solid lines) + shading =====
+    let Pc=pEq, Pp=pEq, Qt=qEq;
+    const shade = shadeSel.value;
 
+    function shadeRect(sc, qLeft, qRight, pLow, pHigh, fill, opacity){
+      if(!(isFinite(qLeft)&&isFinite(qRight)&&isFinite(pLow)&&isFinite(pHigh))) return;
+      const x1 = sc.x(Math.min(qLeft, qRight));
+      const x2 = sc.x(Math.max(qLeft, qRight));
+      const yTop = sc.y(Math.max(pLow,pHigh));
+      const yBot = sc.y(Math.min(pLow,pHigh));
+      svg.appendChild(create('rect',{x:x1, y:yTop, width:x2-x1, height:yBot-yTop, fill, opacity}));
+    }
+    function fillPQ(sc, P, Q, fill, opacity){
+      if(!(isFinite(P)&&isFinite(Q))) return;
+      const yTop=sc.y(P), yBot=sc.y(0), xLeft=sc.x(0), xRight=sc.x(Math.max(0,Q));
+      svg.appendChild(create('rect',{x:xLeft,y:yTop,width:xRight-xLeft,height:yBot-yTop, fill, opacity}));
+    }
+    function shadeGovBetween(sc, Pc_, Pp_, Qt_, fill, opacity){
+      if(!(isFinite(Pc_)&&isFinite(Pp_)&&isFinite(Qt_)&&Qt_>0)) return;
+      const pLow=Math.min(Pc_,Pp_), pHigh=Math.max(Pc_,Pp_);
+      shadeRect(sc, 0, Qt_, pLow, pHigh, fill, opacity);
+    }
+
+    if(D1 && S1 && isFinite(pEq)){
+      // Price controls
+      if (policy==='Ανώτατη τιμή' || policy==='Κατώτατη τιμή'){
+        const pBar = Math.max(0, parseFloat(levelInp.value)||0);
+        hline(svg, sc.y(pBar), sc.x(0), sc.x(qMax), polColor, null, 2);
+
+        const Qd_at = D1.Q(pBar);
+        const Qs_at = S1.Q(pBar);
+        const bindingCeiling = (policy==='Ανώτατη τιμή') && (pBar < pEq);
+        const bindingFloor   = (policy==='Κατώτατη τιμή') && (pBar > pEq);
+        const binding = bindingCeiling || bindingFloor;
+
+        if(binding && isFinite(Qd_at) && isFinite(Qs_at)){
+          Pc = Pp = pBar;
+
+          if (policy==='Ανώτατη τιμή'){
+            Qt = Math.max(0, Math.min(Qd_at, Qs_at));
+            dot(svg, sc.x(Qt), sc.y(Pc), polColor, 4);
+            const x1=sc.x(Math.min(Qd_at,Qs_at)), x2=sc.x(Math.max(Qd_at,Qs_at)), y=sc.y(Pc);
+            hline(svg, y, x1, x2, polColor, null, 4);
+          } else {
+            // Κατώτατη τιμή — user rules:
+            // ΣΔ = p×Qd, ΣΕ = p×Qs, Κρατική Επιβάρυνση = p×(Qs−Qd), με Qs>Qd
+            Qt = Qd_at; // ενδεικτικό σημείο στο Qd
+            dot(svg, sc.x(Qt), sc.y(Pc), polColor, 4);
+
+            if (shade==='Συνολική Δαπάνη' && Qd_at>0){
+              fillPQ(sc, pBar, Math.min(Qd_at,qMax), '#94a3b8', .25);
+            } else if (shade==='Συνολικό Έσοδο' && Qs_at>0){
+              fillPQ(sc, pBar, Math.min(Qs_at,qMax), '#64748b', .25);
+            } else if (shade==='Κρατική Επιβάρυνση' && Qs_at>Qd_at){
+              const q1 = Math.max(0, Math.min(Qd_at, qMax));
+              const q2 = Math.max(0, Math.min(Qs_at, qMax));
+              shadeRect(sc, q1, q2, 0, pBar, polColor, .25);
+            }
+            // οπτική του «πλεονάσματος» στον άξονα Q
+            const x1=sc.x(Math.min(Qd_at,Qs_at)), x2=sc.x(Math.max(Qd_at,Qs_at)), y=sc.y(pBar);
+            hline(svg, y, x1, x2, polColor, null, 3);
+          }
+        } else { Pc=pEq; Pp=pEq; Qt=qEq; }
+      }
+
+      // Tax
+      if(policy==='Φόρος (στους παραγωγούς)' || policy==='Φόρος (στους καταναλωτές)'){
+        const t = Math.max(0, parseFloat(levelInp.value)||0);
+        const F = (Pc_)=> D1.Q(Pc_) - S1.Q(Pc_ - (policy==='Φόρος (στους παραγωγούς)'? t : -t));
+        const PcSol = bisect(F, Math.max(hyperActive?1e-3:0, 0.05*pMaxPlot), Math.max(60, pMaxPlot));
+        if(isFinite(PcSol)){
+          Pc = PcSol; Pp = Pc - (policy==='Φόρος (στους παραγωγούς)'? t : -t); Qt = D1.Q(Pc);
+          dot(svg, sc.x(Qt), sc.y(Pc), polColor, 4);
+          vline(svg, sc.x(Qt), sc.y(Pp), sc.y(Pc), polColor, null, 2);
+        }
+      }
+
+      // Subsidy
+      if(policy==='Επιδότηση'){
+        const s = Math.max(0, parseFloat(levelInp.value)||0);
+        const F = (Pc_)=> D1.Q(Pc_) - S1.Q(Pc_ + s);
+        const PcSol = bisect(F, Math.max(hyperActive?1e-3:0, 0.05*pMaxPlot), Math.max(60, pMaxPlot));
+        if(isFinite(PcSol)){
+          Pc = PcSol; Pp = Pc + s; Qt = D1.Q(Pc);
+          dot(svg, sc.x(Qt), sc.y(Pc), polColor, 4);
+        }
+      }
+
+      // Quota
+      if(policy==='Ποσόστωση'){
+        const qbar = Math.max(0, parseFloat(quotaNum.value)||0);
+        vline(svg, sc.x(qbar), sc.y(0), sc.y(pMaxPlot), polColor, null, 2);
+        const Pc_ = D1.Pinv(qbar), Pp_ = S1.Pinv(qbar);
+        if(isFinite(Pc_) && isFinite(Pp_)){
+          Pc=Pc_; Pp=Pp_; Qt=qbar;
+          dot(svg, sc.x(Qt), sc.y(Pc), polColor, 4);
+        }
+      }
+
+      // Shading application
+      if(isFinite(Qt) && Qt>0 && isFinite(Pc) && Pc>=0){
+        if(shade==='Συνολική Δαπάνη'){
+          fillPQ(sc, Pc, Qt, '#94a3b8', .25);
+        } else if(shade==='Συνολικό Έσοδο' && isFinite(Pp) && Pp>=0){
+          fillPQ(sc, Pp, Qt, '#64748b', .25);
+        } else if(shade==='Κρατικά Έσοδα'){
+          if((policy.includes('Φόρος') || policy==='Ποσόστωση') && isFinite(Pp)){
+            shadeGovBetween(sc, Pc, Pp, Qt, polColor, .25);
+          }
+        } else if(shade==='Κρατική Επιβάρυνση'){
+          if(policy==='Επιδότηση' && isFinite(Pp)){
+            shadeGovBetween(sc, Pc, Pp, Qt, polColor, .25);
+          }
+          // (Για «Κατώτατη τιμή» καλύπτεται παραπάνω ειδικά με p×(Qs−Qd))
+        }
+      }
+    }
 
     note.textContent = eqs.length
       ? 'Ισορροπίες: ' + eqs.map(e => `D${e.i}∩S${e.j}: Q=${e.q.toFixed(2)}, P=${e.p.toFixed(2)}`).join(' · ') + '.'
       : 'Δεν βρέθηκαν ισορροπίες στο τρέχον εύρος.';
   }
 
-  // init
+  // ---------- Init ----------
+  function getDemandFuncs(){
+    const dn = +dNumSel.value|0, out=[];
+    for(let i=1;i<=dn;i++){
+      const type = document.getElementById(`d${i}_type`).value;
+      const color = demandColors[(i-1)%demandColors.length];
+      const a = parseFloat(document.getElementById(`d${i}_a_num`).value||'0');
+      const b = parseFloat(document.getElementById(`d${i}_b_num`).value||'-1');
+      const A = Math.max(1e-9, parseFloat(document.getElementById(`d${i}_A_num`).value||'200'));
+      const pts = parsePairs(document.getElementById(`d${i}_pts`).value||'');
+      let Qd, Pd_inv, hyper=false, isLinear=false;
+      if(type==='linear'){ isLinear=true; Qd=(p)=> a + b*p; Pd_inv=(q)=> Math.abs(b)<1e-9? bisect(P=> (a+b*P)-q, 1e-6, 1e6) : (q-a)/b; }
+      else if(type==='hyper'){ hyper=true; Qd=(p)=> A/Math.max(p,1e-6); Pd_inv=(q)=> A/Math.max(q,1e-6); }
+      else { const f=interp(pts); Qd=(p)=> f(p); Pd_inv=(q)=> bisect(P=>f(P)-q, 1e-3, 1e3); }
+      out.push({name:`D_${i}`, color, Q:(p)=>Qd(p), Pinv:(q)=>Pd_inv(q), hyper, isLinear, a,b,A, type});
+    }
+    return out;
+  }
+  function getSupplyFuncs(){
+    const sn = +sNumSel.value|0, out=[];
+    for(let i=1;i<=sn;i++){
+      const type = document.getElementById(`s${i}_type`).value;
+      const color = supplyColors[(i-1)%supplyColors.length];
+      const c = parseFloat(document.getElementById(`s${i}_c_num`).value||'0');
+      const d = parseFloat(document.getElementById(`s${i}_d_num`).value||'1');
+      const pts = parsePairs(document.getElementById(`s${i}_pts`).value||'');
+      let Qs, Ps_inv, isLinear=false;
+      if(type==='linear'){ isLinear=true; Qs=(p)=> c + d*p; Ps_inv=(q)=> Math.abs(d)<1e-9? bisect(P=> (c+d*P)-q, 1e-6, 1e6) : (q-c)/d; }
+      else { const f=interp(pts); Qs=(p)=> f(p); Ps_inv=(q)=> bisect(P=>f(P)-q, 1e-3, 1e3); }
+      out.push({name:`S_${i}`, color, Q:(p)=>Qs(p), Pinv:(q)=>Ps_inv(q), isLinear, c,d, type});
+    }
+    return out;
+  }
+  function updateLegend(dems, sups){
+    legend.innerHTML = '';
+    for(const d of dems){ const span=document.createElement('span'); span.style.color=d.color; span.innerHTML=`<span class="dot"></span>${d.name}`; legend.appendChild(span); }
+    for(const s of sups){ const span=document.createElement('span'); span.style.color=s.color; span.innerHTML=`<span class="dot"></span>${s.name}`; legend.appendChild(span); }
+    const eq=document.createElement('span'); eq.style.color=eqColor; eq.innerHTML='<span class="dot"></span>Ισορροπία'; legend.appendChild(eq);
+    const pol=document.createElement('span'); pol.style.color='#e879f9'; pol.innerHTML='<span class="dot"></span>Πολιτική'; legend.appendChild(pol);
+  }
+
   buildCurveUIs();
   draw();
 })();
