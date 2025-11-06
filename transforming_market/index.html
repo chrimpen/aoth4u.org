@@ -667,73 +667,103 @@
       drawEqGuides(sc, e.q, e.p, color, qMax, pMaxPlot); // διακεκομμένες προς τους άξονες
     }
 
-    // policies (solid)
-    let Pc=pEq, Pp=pEq, Qt=qEq;
-    const shade = shadeSel.value;
+   // policies (solid)
+  let Pc=pEq, Pp=pEq, Qt=qEq;
+  const shade = shadeSel.value;
+  
+  // helpers
+  function shadeRect(sc, qLeft, qRight, pLow, pHigh, fill, opacity){
+    if(!(isFinite(qLeft)&&isFinite(qRight)&&isFinite(pLow)&&isFinite(pHigh))) return;
+    const x1 = sc.x(Math.min(qLeft, qRight));
+    const x2 = sc.x(Math.max(qLeft, qRight));
+    const yTop = sc.y(Math.max(pLow,pHigh));
+    const yBot = sc.y(Math.min(pLow,pHigh));
+    svg.appendChild(create('rect',{x:x1, y:yTop, width:x2-x1, height:yBot-yTop, fill, opacity}));
+  }
+  function fillPQ(sc, P, Q, fill, opacity){
+    // ορθογώνιο 0..Q και 0..P
+    if(!(isFinite(P)&&isFinite(Q))) return;
+    const yTop=sc.y(P), yBot=sc.y(0), xLeft=sc.x(0), xRight=sc.x(Math.max(0,Q));
+    svg.appendChild(create('rect',{x:xLeft,y:yTop,width:xRight-xLeft,height:yBot-yTop, fill, opacity}));
+  }
+  function shadeGovBetween(sc, Pc_, Pp_, Qt_, fill, opacity){
+    if(!(isFinite(Pc_)&&isFinite(Pp_)&&isFinite(Qt_)&&Qt_>0)) return;
+    const pLow=Math.min(Pc_,Pp_), pHigh=Math.max(Pc_,Pp_);
+    shadeRect(sc, 0, Qt_, pLow, pHigh, fill, opacity);
+  }
+  
+  // Υπολογισμός Pc, Pp, Qt ανά πολιτική
+  if(D1 && S1 && isFinite(pEq)){
+    if(policy==='Ανώτατη τιμή' || policy==='Κατώτατη τιμή'){
+      const pBar = Math.max(0, parseFloat(levelInp.value)||0);
+      // γραμμή πολιτικής
+      hline(svg, sc.y(pBar), sc.x(0), sc.x(qMax), '#e879f9', null, 2);
+      const Qd_at = D1.Q(pBar), Qs_at = S1.Q(pBar);
+      const binding = (policy==='Ανώτατη τιμή') ? (pBar < pEq) : (pBar > pEq);
+      if(binding && isFinite(Qd_at) && isFinite(Qs_at)){
+        Qt = Math.max(0, Math.min(Qd_at, Qs_at));
+        Pc = Pp = pBar;
+        dot(svg, sc.x(Qt), sc.y(Pc), '#e879f9', 4);
+      } else {
+        // μη δεσμευτική: κρατάμε ισορροπία
+        Pc=pEq; Pp=pEq; Qt=qEq;
+      }
+    }
+    if(policy==='Φόρος (στους παραγωγούς)' || policy==='Φόρος (στους καταναλωτές)'){
+      const t = Math.max(0, parseFloat(levelInp.value)||0);
+      const F = (Pc_)=> D1.Q(Pc_) - S1.Q(Pc_ - (policy==='Φόρος (στους παραγωγούς)'? t : -t));
+      const PcSol = bisect(F, Math.max(hyperActive?1e-3:0, 0.05*pMaxPlot), Math.max(60, pMaxPlot));
+      if(isFinite(PcSol)){
+        Pc = PcSol;
+        Pp = Pc - (policy==='Φόρος (στους παραγωγούς)'? t : -t);
+        Qt = D1.Q(Pc);
+        dot(svg, sc.x(Qt), sc.y(Pc), '#e879f9', 4);
+        // προαιρετική οπτικοποίηση «σφήνας»
+        vline(svg, sc.x(Qt), sc.y(Pp), sc.y(Pc), '#e879f9', null, 2);
+      }
+    }
+    if(policy==='Επιδότηση'){
+      const s = Math.max(0, parseFloat(levelInp.value)||0);
+      const F = (Pc_)=> D1.Q(Pc_) - S1.Q(Pc_ + s);
+      const PcSol = bisect(F, Math.max(hyperActive?1e-3:0, 0.05*pMaxPlot), Math.max(60, pMaxPlot));
+      if(isFinite(PcSol)){
+        Pc = PcSol;
+        Pp = Pc + s;
+        Qt = D1.Q(Pc);
+        dot(svg, sc.x(Qt), sc.y(Pc), '#e879f9', 4);
+      }
+    }
+    if(policy==='Ποσόστωση'){
+      const qbar = Math.max(0, parseFloat(quotaNum.value)||0);
+      vline(svg, sc.x(qbar), sc.y(0), sc.y(pMaxPlot), '#e879f9', null, 2);
+      const Pc_ = D1.Pinv(qbar), Pp_ = S1.Pinv(qbar);
+      if(isFinite(Pc_) && isFinite(Pp_)){
+        Pc=Pc_; Pp=Pp_; Qt=qbar;
+        dot(svg, sc.x(Qt), sc.y(Pc), '#e879f9', 4);
+      }
+    }
+  
+    // ---- ΕΦΑΡΜΟΓΗ ΣΚΙΑΣΗΣ ----
+    if(isFinite(Qt) && Qt>0 && isFinite(Pc) && Pc>=0){
+      if(shade==='Συνολική Δαπάνη'){
+        fillPQ(sc, Pc, Qt, '#94a3b8', .25);
+      } else if(shade==='Συνολικό Έσοδο' && isFinite(Pp) && Pp>=0){
+        fillPQ(sc, Pp, Qt, '#64748b', .25);
+      } else if(shade==='Κρατικά Έσοδα'){
+        // φόρος: έσοδα = |Pc-Pp| * Qt
+        // ποσόστωση: «rents» = |Pc-Pp| * Qt (αν θεωρήσουμε δημοπράτηση)
+        if((policy.includes('Φόρος') || policy==='Ποσόστωση') && isFinite(Pp)){
+          shadeGovBetween(sc, Pc, Pp, Qt, '#e879f9', .25);
+        }
+      } else if(shade==='Κρατική Επιβάρυνση'){
+        // επιδότηση: δημοσιονομικό κόστος = |Pc-Pp| * Qt
+        if(policy==='Επιδότηση' && isFinite(Pp)){
+          shadeGovBetween(sc, Pc, Pp, Qt, '#e879f9', .25);
+        }
+      }
+    }
+  }
 
-    function shadeRect(sc, qLeft, qRight, pLow, pHigh, fill, opacity){
-      if(!(isFinite(qLeft)&&isFinite(qRight)&&isFinite(pLow)&&isFinite(pHigh))) return;
-      const x1 = sc.x(Math.min(qLeft, qRight));
-      const x2 = sc.x(Math.max(qLeft, qRight));
-      const yTop = sc.y(Math.max(pLow,pHigh));
-      const yBot = sc.y(Math.min(pLow,pHigh));
-      const r = create('rect',{x:x1, y:yTop, width:x2-x1, height:yBot-yTop, fill, opacity});
-      svg.appendChild(r);
-    }
-    function rect0(sc, pHigh, q){
-      if(!(isFinite(pHigh)&&isFinite(q))) return;
-      const yTop=sc.y(pHigh), yBot=sc.y(0), xLeft=sc.x(0), xRight=sc.x(Math.max(0,q));
-      const r=create('rect',{x:xLeft,y:yTop,width:xRight-xLeft,height:yBot-yTop, fill:'#94a3b8', opacity:.25});
-      svg.appendChild(r);
-    }
-
-    if(D1&&S1&&isFinite(pEq)){
-      if(policy==='Ανώτατη τιμή' || policy==='Κατώτατη τιμή'){
-        const pBar=level;
-        hline(svg, sc.y(pBar), sc.x(0), sc.x(qMax), '#e879f9', null, 2);
-        const Qd_at=D1.Q(pBar), Qs_at=S1.Q(pBar);
-        const binding = (policy==='Ανώτατη τιμή') ? (pBar<pEq) : (pBar>pEq);
-        if(binding && isFinite(Qd_at) && isFinite(Qs_at)){
-          Qt=Math.max(0, Math.min(Qd_at, Qs_at)); Pc=Pp=pBar;
-          dot(svg, sc.x(Qt), sc.y(Pc), '#e879f9', 4);
-        }
-      }
-      if(policy==='Φόρος (στους παραγωγούς)' || policy==='Φόρος (στους καταναλωτές)'){
-        const t=level;
-        const F=(Pc_)=> D1.Q(Pc_) - S1.Q(Pc_ - (policy==='Φόρος (στους παραγωγούς)'? t : -t));
-        const PcSol=bisect(F, Math.max(hyperActive?1e-3:0,0.05*pMaxPlot), Math.max(60,pMaxPlot));
-        if(isFinite(PcSol)){ Pc=PcSol; Pp=Pc-(policy==='Φόρος (στους παραγωγούς)'? t : -t); Qt=D1.Q(Pc);
-          dot(svg, sc.x(Qt), sc.y(Pc), '#e879f9', 4);
-        }
-      }
-      if(policy==='Επιδότηση'){
-        const s=level;
-        const F=(Pc_)=> D1.Q(Pc_) - S1.Q(Pc_ + s);
-        const PcSol=bisect(F, Math.max(hyperActive?1e-3:0,0.05*pMaxPlot), Math.max(60,pMaxPlot));
-        if(isFinite(PcSol)){ Pc=PcSol; Pp=Pc+s; Qt=D1.Q(Pc);
-          dot(svg, sc.x(Qt), sc.y(Pc), '#e879f9', 4);
-        }
-      }
-      if(policy==='Ποσόστωση'){
-        vline(svg, sc.x(qbar), sc.y(0), sc.y(pMaxPlot), '#e879f9', null, 2);
-        const Pc_=D1.Pinv(qbar), Pp_=S1.Pinv(qbar);
-        if(isFinite(Pc_)&&isFinite(Pp_)){ Pc=Pc_; Pp=Pp_; Qt=qbar;
-          dot(svg, sc.x(Qt), sc.y(Pc), '#e879f9', 4);
-        }
-      }
-      if(isFinite(Qt) && isFinite(Pc) && Qt>=0 && Pc>=0){
-        if(shade==='Συνολική Δαπάνη') rect0(sc, Pc, Qt);
-        if(shade==='Συνολικό Έσοδο')   rect0(sc, Pp, Qt);
-        if(shade==='Κρατικά Έσοδα' && isFinite(Pp)){
-          const pLow=Math.min(Pp,Pc), pHigh=Math.max(Pp,Pc);
-          shadeRect(sc, 0, Qt, pLow, pHigh, '#e879f9', .25);
-        }
-        if(shade==='Κρατική Επιβάρυνση' && policy==='Επιδότηση' && isFinite(Pp)){
-          const pLow=Math.min(Pp,Pc), pHigh=Math.max(Pp,Pc);
-          shadeRect(sc, 0, Qt, pLow, pHigh, '#e879f9', .25);
-        }
-      }
-    }
 
     note.textContent = eqs.length
       ? 'Ισορροπίες: ' + eqs.map(e => `D${e.i}∩S${e.j}: Q=${e.q.toFixed(2)}, P=${e.p.toFixed(2)}`).join(' · ') + '.'
