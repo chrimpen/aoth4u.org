@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Σ.Γ.Ε. | aoth4U</title>
+<style>
+:root{
+  --bg:#7fc1bb;
+  --amber: rgba(255,193,7,0.9);
+  --rose:#f43f5e;
+  --rose-600:#e11d48;
+  --text-on-rose:#fff;
+  --header-offset:96px; /* θα προσαρμοστεί δυναμικά με JS */
+}
+
+/* Native anchor offset */
+html{scroll-behavior:smooth; scroll-padding-top:var(--header-offset);}
+section{scroll-margin-top:var(--header-offset);}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+}
+
+/* Sticky header */
+header{
+  position:sticky; top:0; z-index:1000;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:clamp(12px,3vw,20px);
+  background:var(--amber);
+  -webkit-backdrop-filter:saturate(140%) blur(6px);
+  backdrop-filter:saturate(140%) blur(6px);
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+.logo{
+  display:block; width:clamp(56px,14vw,120px); height:auto;
+  border-radius:10px; box-shadow:0 6px 16px rgba(0,0,0,.12);
+}
+.header-buttons{display:flex; gap:12px; flex-wrap:wrap;}
+
+main{
+  display:grid; place-items:start center;
+  gap:28px; padding:clamp(16px,4vw,32px);
+}
+
+/* Content cards */
+.container{
+  width:min(800px,92vw);
+  background:rgba(255,255,255,.2);
+  padding:24px; border-radius:16px;
+  box-shadow:0 6px 18px rgba(0,0,0,.15);
+}
+.container h2{margin:0 0 12px; color:#fff}
+
+/* Links grid */
+.links{width:min(680px,92vw); display:grid; gap:14px; grid-template-columns:1fr;}
+@media (min-width:640px){.links{grid-template-columns:1fr 1fr;}}
+
+/* 5x5 responsive grid */
+.pdf-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:12px;}
+@media (max-width:700px){.pdf-grid{grid-template-columns:repeat(2,1fr);}}
+@media (min-width:701px) and (max-width:999px){.pdf-grid{grid-template-columns:repeat(3,1fr);}}
+
+/* Buttons — apply to both <a> and <button> */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  text-decoration:none; padding:14px 18px; border:0; border-radius:12px;
+  background:var(--rose); color:var(--text-on-rose);
+  font-weight:700; letter-spacing:.2px; cursor:pointer;
+  box-shadow:0 6px 18px rgba(244,63,94,.25);
+  transition:transform .06s ease, background .2s ease, box-shadow .2s ease;
+}
+.btn:hover{background:var(--rose-600);}
+.btn:active{transform:translateY(1px); box-shadow:0 4px 12px rgba(244,63,94,.28);}
+@media (prefers-reduced-motion:reduce){
+  .btn{transition:background .2s ease;}
+  .btn:active{transform:none;}
+}
+
+/* Footer */
+footer{
+  /* position: fixed; /*     /* ΝΕΟ: πάντα ορατό */
+  left: 0; right: 0; bottom: 0;
+  z-index: 1000;
+  display:grid; gap:14px; padding:20px; justify-content:center;
+  background:rgba(0,0,0,.05);
+  box-shadow: 0 -2px 8px rgba(0,0,0,.12); /* προαιρετικό */
+}
+@media (min-width:640px){footer{grid-template-columns:repeat(5,auto);}}
+
+/* Dropdown */
+.menu{position:relative;}
+.chev{
+  width:10px; height:10px; margin-left:8px;
+  border-right:2px solid currentColor; border-bottom:2px solid currentColor;
+  transform:rotate(45deg); transition:transform .2s ease; opacity:.9;
+}
+button[aria-expanded="true"] .chev{transform:rotate(225deg);}
+
+.dropdown.rose{
+  position:absolute; right:0; top:calc(100% + 8px);
+  min-width:260px; background:var(--rose); color:var(--text-on-rose);
+  border-radius:12px; box-shadow:0 20px 40px rgba(0,0,0,.25);
+  padding:8px; display:none; z-index:1001;
+}
+.menu.open .dropdown{display:block;}
+
+.dd-item{
+  display:block; color:inherit; text-decoration:none;
+  padding:12px; border-radius:10px;
+  transition:background .15s ease, transform .06s ease;
+}
+.dd-item:hover{background:rgba(0,0,0,.10);}
+.dd-item:active{transform:translateY(1px);}
+
+/* Τρέχον μάθημα και κοινές κενές ενότητες */
+.course-title{
+  width:min(800px,92vw); margin:0; color:#164e55;
+  font-size:clamp(24px,4vw,32px); line-height:1.25;
+}
+.course-title span{display:block; margin-top:6px; font-size:16px; font-weight:500;}
+.dd-item[aria-current="page"]{background:rgba(0,0,0,.14);}
+.empty-state{margin:0; color:#164e55; line-height:1.6;}
+</style>
+</head>
+<body>
+  <header>
+    <img src="FB logo.png" alt="Company Logo" class="logo" />
+
+    <nav class="header-buttons" aria-label="Γρήγορη πλοήγηση">
+      <a class="btn" href="#apps">Διαδραστικές εφαρμογές</a>
+      <a class="btn" href="#activities">Πρακτική Εξάσκηση</a>
+
+      <!-- Dropdown: Θέματα Πανελληνίων -->
+      <div class="menu">
+        <button class="btn" id="topicsBtn" aria-haspopup="true" aria-expanded="false" aria-controls="topicsMenu">
+          Θέματα Πανελληνίων
+          <span class="chev" aria-hidden="true"></span>
+        </button>
+        <div class="dropdown rose" id="topicsMenu" role="menu" aria-label="Θέματα Πανελληνίων">
+          <a class="dd-item" role="menuitem" href="#EPALtasks">ΕΠΑ.Λ. Θέματα Πανελληνίων</a>
+          <a class="dd-item" role="menuitem" href="#EPALEPANtasks">ΕΠΑ.Λ. Επαν. Θέματα Πανελληνίων</a>
+        </div>
+      </div>
+
+      <!-- ΝΕΟ Dropdown: Λύσεις Πανελληνίων -->
+      <div class="menu">
+        <button class="btn" id="solutionsBtn" aria-haspopup="true" aria-expanded="false" aria-controls="solutionsMenu">
+          Λύσεις Πανελληνίων
+          <span class="chev" aria-hidden="true"></span>
+        </button>
+        <div class="dropdown rose" id="solutionsMenu" role="menu" aria-label="Λύσεις Πανελληνίων">
+          <a class="dd-item" role="menuitem" href="#EPALsolutions">ΕΠΑ.Λ. Λύσεις Πανελληνίων</a>
+          <a class="dd-item" role="menuitem" href="#EPALEPANsolutions">ΕΠΑ.Λ. Επαν. Λύσεις</a>
+        </div>
+      </div>
+
+      <!-- Dropdown: Μάθημα -->
+      <div class="menu">
+        <button class="btn" id="courseBtn" aria-haspopup="true" aria-expanded="false" aria-controls="courseMenu">
+          Μάθημα
+          <span class="chev" aria-hidden="true"></span>
+        </button>
+        <div class="dropdown rose" id="courseMenu" role="menu" aria-label="Μάθημα">
+          <a class="dd-item" role="menuitem" href="index.html">Α.Ο.Θ.</a>
+          <a class="dd-item" role="menuitem" href="aod.html">Α.Ο.Δ.</a>
+          <a class="dd-item" role="menuitem" href="sge.html" aria-current="page">Σ.Γ.Ε.</a>
+        </div>
+      </div>
+      
+    </nav>
+  </header>
+
+  <main>
+    <h1 class="course-title">Σ.Γ.Ε.<span>Σύγχρονες Γεωργικές Επιχειρήσεις</span></h1>
+
+    <section id="apps" class="container">
+      <h2>Διαδραστικές εφαρμογές</h2>
+      <p class="empty-state">Το υλικό θα προστεθεί σύντομα.</p>
+      <div class="links">
+        <!-- Προσθήκη υλικού Σ.Γ.Ε.: αφαιρέστε το παραπάνω μήνυμα και προσθέστε εδώ τα κουμπιά. -->
+        <!-- Προσθέστε εδώ τον πραγματικό σύνδεσμο και την ετικέτα της ενότητας. -->
+      </div>
+    </section>
+
+    <section id="activities" class="container">
+      <h2>Πρακτική Εξάσκηση</h2>
+      <p class="empty-state">Το υλικό θα προστεθεί σύντομα.</p>
+      <div class="links">
+        <!-- Προσθήκη υλικού Σ.Γ.Ε.: αφαιρέστε το παραπάνω μήνυμα και προσθέστε εδώ τα κουμπιά. -->
+        <!-- Παράδειγμα: <a class="btn" href="SGE_KENA_THEORIAS.pdf" target="_blank" rel="noopener">Κενά Θεωρίας ΕΠΑ.Λ</a> -->
+      </div>
+    </section>
+
+    <section id="EPALtasks" class="container">
+      <h2>ΕΠΑ.Λ. Θέματα Πανελληνίων</h2>
+      <p class="empty-state">Το υλικό θα προστεθεί σύντομα.</p>
+      <div class="pdf-grid">
+        <!-- Προσθήκη υλικού Σ.Γ.Ε.: αφαιρέστε το παραπάνω μήνυμα και προσθέστε εδώ τα κουμπιά. -->
+        <!-- Παράδειγμα: <a class="btn" href="SGE_THEMATA_2027.pdf" target="_blank" rel="noopener">2027</a> -->
+      </div>
+    </section>
+
+    <section id="EPALEPANtasks" class="container">
+      <h2>ΕΠΑ.Λ. Επαναληπτικά Θέματα Πανελληνίων</h2>
+      <p class="empty-state">Το υλικό θα προστεθεί σύντομα.</p>
+      <div class="pdf-grid">
+        <!-- Προσθήκη υλικού Σ.Γ.Ε.: αφαιρέστε το παραπάνω μήνυμα και προσθέστε εδώ τα κουμπιά. -->
+        <!-- Παράδειγμα: <a class="btn" href="SGE_EPAN_THEMATA_2027.pdf" target="_blank" rel="noopener">2027</a> -->
+      </div>
+    </section>
+
+    <section id="EPALsolutions" class="container">
+      <h2>ΕΠΑ.Λ. Λύσεις Πανελληνίων</h2>
+      <p class="empty-state">Το υλικό θα προστεθεί σύντομα.</p>
+      <div class="pdf-grid">
+        <!-- Προσθήκη υλικού Σ.Γ.Ε.: αφαιρέστε το παραπάνω μήνυμα και προσθέστε εδώ τα κουμπιά. -->
+        <!-- Παράδειγμα: <a class="btn" href="SGE_LYSEIS_2027.pdf" target="_blank" rel="noopener">2027</a> -->
+      </div>
+    </section>
+
+    <section id="EPALEPANsolutions" class="container">
+      <h2>ΕΠΑ.Λ. Επαναληπτικές – Λύσεις</h2>
+      <p class="empty-state">Το υλικό θα προστεθεί σύντομα.</p>
+      <div class="pdf-grid">
+        <!-- Προσθήκη υλικού Σ.Γ.Ε.: αφαιρέστε το παραπάνω μήνυμα και προσθέστε εδώ τα κουμπιά. -->
+        <!-- Παράδειγμα: <a class="btn" href="SGE_EPAN_LYSEIS_2027.pdf" target="_blank" rel="noopener">2027</a> -->
+      </div>
+    </section>
+
+    <section id="AGRITheory" class="container">
+      <h2>Σ.Γ.Ε. Θεωρία</h2>
+      <p class="empty-state">Το υλικό θα προστεθεί σύντομα.</p>
+      <div class="pdf-grid">
+        <!-- Προσθήκη υλικού Σ.Γ.Ε.: αφαιρέστε το παραπάνω μήνυμα και προσθέστε εδώ τα κουμπιά. -->
+        <!-- Προσθέστε εδώ τον πραγματικό σύνδεσμο και την ετικέτα της ενότητας. -->
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <a class="btn" href="mailto:chrimpen@hotmail.gr" target="_blank" rel="noopener">Mail</a>
+    <a class="btn" href="https://forms.gle/qL8Cju8iMPPZdKMw7" target="_blank" rel="noopener">Φόρμα επικοινωνίας</a>
+    <a class="btn" href="https://open.spotify.com/show/4T8pEDLtQePgjHe7SmZj7f?si=zpAtk0IxRkCKObk26T5Cxg" target="_blank" rel="noopener">Spotify</a>
+    <a class="btn" href="https://www.instagram.com/ao8_4_u?igsh=d2hmcXhwaWxpc2ti&utm_source=qr" target="_blank" rel="noopener">Instagram</a>
+    <a class="btn" href="https://www.tiktok.com/@aoth4u?_t=ZN-90XeXjZNrwU&_r=1" target="_blank" rel="noopener">TikTok</a>
+  </footer>
+
+  <!-- JS: πολλαπλά dropdown + dynamic sticky offset -->
+  <script>
+    (function () {
+      // Υποστήριξη ΠΟΛΛΩΝ dropdowns μέσα στο header
+      const menus = Array.from(document.querySelectorAll('.menu'));
+
+      function setOpen(menuEl, open) {
+        const btn = menuEl.querySelector('button[id]');
+        if (!btn) return;
+        menuEl.classList.toggle('open', open);
+        btn.setAttribute('aria-expanded', String(open));
+      }
+
+      menus.forEach(menuEl => {
+        const btn = menuEl.querySelector('button[id]');
+        const panelId = btn && btn.getAttribute('aria-controls');
+        const panel = panelId && document.getElementById(panelId);
+        if (!btn || !panel) return;
+
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const willOpen = !menuEl.classList.contains('open');
+          // Κλείσε όσα είναι ανοιχτά
+          menus.forEach(m => setOpen(m, false));
+          setOpen(menuEl, willOpen);
+        });
+
+        panel.querySelectorAll('.dd-item').forEach(a => {
+          a.addEventListener('click', () => setOpen(menuEl, false));
+        });
+      });
+
+      // Κλείσιμο όταν γίνεται κλικ εκτός
+      document.addEventListener('click', () => menus.forEach(m => setOpen(m, false)));
+      // Esc για κλείσιμο
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') menus.forEach(m => setOpen(m, false));
+      });
+
+      // Dynamic header offset για anchor targets
+      const header = document.querySelector('header');
+      function setOffset(){
+        if(!header) return;
+        const h = Math.ceil(header.getBoundingClientRect().height);
+        document.documentElement.style.setProperty('--header-offset', (h + 8) + 'px');
+      }
+      setOffset(); window.addEventListener('resize', setOffset);
+    })();
+  </script>
+</body>
+</html>
+
