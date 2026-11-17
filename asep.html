@@ -112,7 +112,6 @@
       background: rgba(0,0,0,.05);
       box-shadow: 0 -2px 8px rgba(0,0,0,.12);
     }
-    @media (min-width:640px) { footer { grid-template-columns: repeat(5,auto); } }
     .menu { position: relative; }
     .chev {
       width: 10px;
@@ -185,11 +184,7 @@
     <iframe id="appFrame" class="app-frame" title="ΑΣΕΠ4U — Μελέτη και εξέταση" referrerpolicy="strict-origin" hidden></iframe>
   </main>
   <footer>
-    <a class="btn" href="mailto:chrimpen@hotmail.gr" target="_blank" rel="noopener">Mail</a>
-    <a class="btn" href="https://forms.gle/qL8Cju8iMPPZdKMw7" target="_blank" rel="noopener">Φόρμα επικοινωνίας</a>
-    <a class="btn" href="https://open.spotify.com/show/4T8pEDLtQePgjHe7SmZj7f?si=zpAtk0IxRkCKObk26T5Cxg" target="_blank" rel="noopener">Spotify</a>
-    <a class="btn" href="https://www.instagram.com/ao8_4_u?igsh=d2hmcXhwaWxpc2ti&utm_source=qr" target="_blank" rel="noopener">Instagram</a>
-    <a class="btn" href="https://www.tiktok.com/@aoth4u?_t=ZN-90XeXjZNrwU&_r=1" target="_blank" rel="noopener">TikTok</a>
+    <a class="btn" id="contactBtn" href="/asep?app=1&amp;contact=1">Φόρμα επικοινωνίας</a>
   </footer>
   <script>
     const menu = document.querySelector('.menu');
@@ -218,16 +213,21 @@
     menu.addEventListener('focusout', event => {
       if (!menu.contains(event.relatedTarget)) setOpen(false);
     });
-    function openApp() {
+    function openApp(contact = false) {
       document.body.classList.add('app-open');
       document.getElementById('pageTitle').hidden = true;
       document.getElementById('introduction').hidden = true;
       document.querySelector('footer').hidden = true;
       frame.hidden = false;
-      if (!frame.hasAttribute('src')) frame.src = 'https://asep-levels-pilot-eva.chrimpen0.chatgpt.site/?embed=aoth4u';
+      if (!frame.hasAttribute('src')) frame.src = 'https://asep-levels-pilot-eva.chrimpen0.chatgpt.site/?embed=aoth4u' + (contact ? '&contact=1' : '');
       frame.focus();
     }
-    document.getElementById('launchBtn').addEventListener('click', openApp);
+    document.getElementById('launchBtn').addEventListener('click', () => openApp());
+    document.getElementById('contactBtn').addEventListener('click', event => {
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      openApp(true);
+    });
     new ResizeObserver(entries => {
       document.documentElement.style.setProperty('--header-height', entries[0].target.getBoundingClientRect().height + 'px');
     }).observe(document.querySelector('header'));
@@ -262,7 +262,8 @@
       installButton.focus();
     });
     updateInstallButton();
-    if (standalone.matches || navigator.standalone === true || new URLSearchParams(location.search).get('app') === '1') openApp();
+    const entry = new URLSearchParams(location.search);
+    if (standalone.matches || navigator.standalone === true || entry.get('app') === '1' || entry.get('contact') === '1') openApp(entry.get('contact') === '1');
   </script>
 </body>
 </html>
