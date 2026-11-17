@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ΑΣΕΠ4U | aoth4U</title>
+  <meta name="description" content="Προετοιμασία για τον διαγωνισμό του ΑΣΕΠ με μελέτη, επανάληψη και δοκιμαστικές εξετάσεις στην εφαρμογή ΑΣΕΠ4U." />
+  <link rel="canonical" href="https://www.aoth4u.org/asep" />
+  <link rel="manifest" href="/asep.webmanifest" />
+  <link rel="icon" href="/asep-icon-192.png" />
+  <link rel="apple-touch-icon" href="/asep-apple-touch-icon.png" />
+  <meta name="theme-color" content="#ffc107" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ΑΣΕΠ4U" />
+  <style>
+    :root {
+      --bg: #7fc1bb;
+      --amber: rgba(255,193,7,.9);
+      --rose: #f43f5e;
+      --rose-600: #e11d48;
+      --ink: #164e55;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: clamp(12px,3vw,20px);
+      background: var(--amber);
+      -webkit-backdrop-filter: saturate(140%) blur(6px);
+      backdrop-filter: saturate(140%) blur(6px);
+      box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    }
+    .logo {
+      display: block;
+      width: clamp(56px,14vw,120px);
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.12);
+    }
+    .header-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+    main {
+      display: grid;
+      align-content: start;
+      justify-items: center;
+      gap: 28px;
+      padding: clamp(16px,4vw,32px);
+    }
+    .course-title {
+      width: min(800px,100%);
+      margin: 0;
+      font-size: clamp(26px,4vw,36px);
+      line-height: 1.25;
+    }
+    .course-title span {
+      display: block;
+      margin-top: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    .container {
+      width: min(800px,100%);
+      background: rgba(255,255,255,.2);
+      padding: clamp(20px,4vw,32px);
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.15);
+    }
+    .container p { margin: 0 0 20px; line-height: 1.7; }
+    .container .app-note { font-size: 14px; margin: 12px 0 0; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      padding: 14px 18px;
+      border: 0;
+      border-radius: 12px;
+      background: var(--rose);
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      letter-spacing: .2px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(244,63,94,.25);
+    }
+    .btn:hover { background: var(--rose-600); }
+    .btn:active { transform: translateY(1px); }
+    a:focus-visible, button:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
+    .launch-button { width: 100%; max-width: 440px; min-height: 58px; text-align: center; }
+    footer {
+      display: grid;
+      gap: 14px;
+      padding: 20px;
+      justify-content: center;
+      background: rgba(0,0,0,.05);
+      box-shadow: 0 -2px 8px rgba(0,0,0,.12);
+    }
+    @media (min-width:640px) { footer { grid-template-columns: repeat(5,auto); } }
+    .menu { position: relative; }
+    .chev {
+      width: 10px;
+      height: 10px;
+      margin-left: 8px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg);
+    }
+    button[aria-expanded="true"] .chev { transform: rotate(225deg); }
+    .dropdown {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      width: min(300px,calc(100vw - 32px));
+      background: var(--rose);
+      color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0,0,0,.25);
+      padding: 8px;
+    }
+    .dd-item { display: block; color: inherit; text-decoration: none; padding: 12px; border-radius: 10px; }
+    .dd-item:hover, .dd-item[aria-current="page"] { background: rgba(0,0,0,.14); }
+    @media (prefers-reduced-motion:reduce) { .btn:active { transform: none; } }
+    [hidden] { display: none !important; }
+    .install-help { width: min(800px,100%); padding: 20px; background: #fffdf6; border-radius: 16px; }
+    .install-help p { line-height: 1.6; }
+    .install-help h2 { margin-top: 0; font-size: 20px; }
+    .app-frame { width: 100%; height: calc(100dvh - var(--header-height,80px)); border: 0; background: #fffdf6; }
+    body.app-open main { display: block; padding: 0; }
+    body.app-open .logo { width: 44px; }
+    body.app-open header { padding: 10px 16px; }
+    body.app-open .install-help { position: fixed; top: var(--header-height,80px); left: 50%; transform: translateX(-50%); z-index: 100; box-shadow: 0 12px 30px #0003; max-height: 70dvh; overflow: auto; }
+    @media (max-width:400px) { .header-buttons { gap: 6px; } header .btn { padding: 12px 10px; font-size: 13px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" aria-label="Αρχική σελίδα aoth4U"><img src="/FB%20logo.png" alt="aoth4U" class="logo" /></a>
+    <nav class="header-buttons" aria-label="Γρήγορη πλοήγηση">
+      <button type="button" class="btn" id="installBtn" aria-controls="installHelp" aria-expanded="false" hidden>Εγκατάσταση</button>
+      <div class="menu">
+        <button type="button" class="btn" id="courseBtn" aria-expanded="false" aria-controls="courseMenu">
+          Μάθημα <span class="chev" aria-hidden="true"></span>
+        </button>
+        <div class="dropdown" id="courseMenu" hidden>
+          <a class="dd-item" href="/">Α.Ο.Θ.</a>
+          <a class="dd-item" href="/aod">Α.Ο.Δ.</a>
+          <a class="dd-item" href="/sge">Σ.Γ.Ε.</a>
+          <a class="dd-item" href="/asep" aria-current="page">ΑΣΕΠ4U</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <main>
+    <h1 class="course-title" id="pageTitle">ΑΣΕΠ4U<span>Προετοιμασία για τον διαγωνισμό του ΑΣΕΠ</span></h1>
+    <section class="container" id="introduction" aria-label="Εφαρμογή ΑΣΕΠ4U">
+      <p>Μελέτη ανά μάθημα, επανάληψη και προσωπική πρόοδος. Δοκιμαστικές εξετάσεις με 40 ερωτήσεις από τα 11 μαθήματα και χρόνο 40 λεπτών.</p>
+      <button type="button" class="btn launch-button" id="launchBtn">Άνοιγμα εφαρμογής ΑΣΕΠ4U</button>
+      <p class="app-note">Απαιτείται σύνδεση στο διαδίκτυο. Από την «Εγκατάσταση» μπορείς να προσθέσεις το ΑΣΕΠ4U στη συσκευή σου.</p>
+      <noscript><p>Ενεργοποίησε τη JavaScript στο πρόγραμμα περιήγησης για να ανοίξεις την εφαρμογή.</p></noscript>
+    </section>
+    <section class="install-help" id="installHelp" aria-labelledby="installTitle" hidden>
+      <h2 id="installTitle">Το ΑΣΕΠ4U στη συσκευή σου</h2>
+      <p><strong>iPhone / iPad</strong><br />Στο Safari, πάτησε Κοινοποίηση → Προσθήκη στην οθόνη Αφετηρίας. Ενεργοποίησε «Άνοιγμα ως εφαρμογή ιστού», αν εμφανίζεται.</p>
+      <p><strong>Android</strong><br />Στο Chrome, πάτησε το μενού ⋮ → Εγκατάσταση εφαρμογής ή Προσθήκη στην αρχική οθόνη.</p>
+      <p><strong>Υπολογιστής</strong><br />Στο Chrome ή Edge, χρησιμοποίησε την εγκατάσταση από τη γραμμή διεύθυνσης ή το μενού. Στο Safari του Mac, επίλεξε Αρχείο → Προσθήκη στο Dock.</p>
+      <p>Η εγκατεστημένη εφαρμογή χρειάζεται σύνδεση στο διαδίκτυο.</p>
+      <button type="button" class="btn" id="closeInstall">Κλείσιμο οδηγιών</button>
+    </section>
+    <iframe id="appFrame" class="app-frame" title="ΑΣΕΠ4U — Μελέτη και εξέταση" referrerpolicy="strict-origin" hidden></iframe>
+  </main>
+  <footer>
+    <a class="btn" href="mailto:chrimpen@hotmail.gr" target="_blank" rel="noopener">Mail</a>
+    <a class="btn" href="https://forms.gle/qL8Cju8iMPPZdKMw7" target="_blank" rel="noopener">Φόρμα επικοινωνίας</a>
+    <a class="btn" href="https://open.spotify.com/show/4T8pEDLtQePgjHe7SmZj7f?si=zpAtk0IxRkCKObk26T5Cxg" target="_blank" rel="noopener">Spotify</a>
+    <a class="btn" href="https://www.instagram.com/ao8_4_u?igsh=d2hmcXhwaWxpc2ti&utm_source=qr" target="_blank" rel="noopener">Instagram</a>
+    <a class="btn" href="https://www.tiktok.com/@aoth4u?_t=ZN-90XeXjZNrwU&_r=1" target="_blank" rel="noopener">TikTok</a>
+  </footer>
+  <script>
+    const menu = document.querySelector('.menu');
+    const button = document.getElementById('courseBtn');
+    const panel = document.getElementById('courseMenu');
+    const frame = document.getElementById('appFrame');
+    const installButton = document.getElementById('installBtn');
+    const installHelp = document.getElementById('installHelp');
+    const standalone = window.matchMedia('(display-mode: standalone)');
+    let installPrompt = null;
+
+    function setOpen(open) {
+      panel.hidden = !open;
+      button.setAttribute('aria-expanded', String(open));
+    }
+    button.addEventListener('click', () => setOpen(panel.hidden));
+    document.addEventListener('click', event => {
+      if (!menu.contains(event.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        if (!panel.hidden) { setOpen(false); button.focus(); }
+        if (!installHelp.hidden) { showInstallHelp(false); installButton.focus(); }
+      }
+    });
+    menu.addEventListener('focusout', event => {
+      if (!menu.contains(event.relatedTarget)) setOpen(false);
+    });
+    function openApp() {
+      document.body.classList.add('app-open');
+      document.getElementById('pageTitle').hidden = true;
+      document.getElementById('introduction').hidden = true;
+      document.querySelector('footer').hidden = true;
+      frame.hidden = false;
+      if (!frame.hasAttribute('src')) frame.src = 'https://asep-levels-pilot-eva.chrimpen0.chatgpt.site/?embed=aoth4u';
+      frame.focus();
+    }
+    document.getElementById('launchBtn').addEventListener('click', openApp);
+    new ResizeObserver(entries => {
+      document.documentElement.style.setProperty('--header-height', entries[0].target.getBoundingClientRect().height + 'px');
+    }).observe(document.querySelector('header'));
+
+    function updateInstallButton() {
+      installButton.hidden = standalone.matches || navigator.standalone === true;
+    }
+    function showInstallHelp(open) {
+      installHelp.hidden = !open;
+      installButton.setAttribute('aria-expanded', String(open));
+    }
+    window.addEventListener('beforeinstallprompt', event => {
+      event.preventDefault();
+      installPrompt = event;
+      updateInstallButton();
+    });
+    window.addEventListener('appinstalled', () => {
+      installPrompt = null;
+      installButton.hidden = true;
+      showInstallHelp(false);
+    });
+    standalone.addEventListener('change', updateInstallButton);
+    installButton.addEventListener('click', async () => {
+      if (!installPrompt) { showInstallHelp(installHelp.hidden); return; }
+      const prompt = installPrompt;
+      installPrompt = null;
+      try { await prompt.prompt(); await prompt.userChoice; }
+      catch { showInstallHelp(true); }
+    });
+    document.getElementById('closeInstall').addEventListener('click', () => {
+      showInstallHelp(false);
+      installButton.focus();
+    });
+    updateInstallButton();
+    if (standalone.matches || navigator.standalone === true || new URLSearchParams(location.search).get('app') === '1') openApp();
+  </script>
+</body>
+</html>
