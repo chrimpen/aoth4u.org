@@ -1,11 +1,16 @@
 .app-entry {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) clamp(168px, 19vw, 194px);
   align-items: center;
-  gap: clamp(8px, 2vw, 16px);
-  width: min(100%, 460px);
+  gap: clamp(12px, 2vw, 22px);
+  width: min(100%, 550px);
   text-decoration: none;
 }
 .app-entry .btn { text-align: center; }
-.app-entry img { display: block; }
+.app-entry img { display: block; width: 100%; height: auto; }
 .app-entry:hover .btn, .app-entry:focus-visible .btn { background: var(--rose-600); }
+@media (max-width: 440px) {
+  #aoth4u-app { padding-inline: 14px; }
+  .app-entry { grid-template-columns: minmax(0, 1fr) clamp(144px, 41vw, 168px); gap: 8px; }
+  .app-entry .btn { padding-inline: 6px; }
+}
