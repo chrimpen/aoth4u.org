@@ -1,0 +1,11 @@
+.app-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(8px, 2vw, 16px);
+  width: min(100%, 460px);
+  text-decoration: none;
+}
+.app-entry .btn { text-align: center; }
+.app-entry img { display: block; }
+.app-entry:hover .btn, .app-entry:focus-visible .btn { background: var(--rose-600); }
