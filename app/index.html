@@ -4,33 +4,67 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="referrer" content="no-referrer">
-  <title>ΑΟΘ4U · aoth4u.org/app</title>
+  <meta name="theme-color" content="#ffc107">
+  <title>ΑΟΘ4U · Πανελλήνιες</title>
+  <link rel="canonical" href="https://www.aoth4u.org/app/">
+  <link rel="icon" href="/FB%20logo.png">
   <style>
-    * { box-sizing:border-box }
-    body { margin:0; color:#25443e; background:#faf8f3; font:17px/1.55 system-ui,sans-serif }
-    [hidden] { display:none !important }
-    header { display:flex; align-items:center; gap:1rem; padding:14px clamp(16px,4vw,48px); background:#fff; border-bottom:1px solid #d6e2dc }
-    header a { display:inline-flex; align-items:center; gap:12px; color:inherit; text-decoration:none; font-weight:700 }
-    header img { width:40px; height:40px; object-fit:contain }
-    main { max-width:620px; margin:clamp(40px,12vh,110px) auto; padding:0 24px }
-    h1 { font-size:clamp(2rem,6vw,3.1rem); line-height:1.12; margin:0 0 1rem }
-    nav { display:flex; gap:.8rem; flex-wrap:wrap; margin:1.6rem 0 }
-    nav a { padding:11px 20px; border-radius:12px; color:#25443e; border:1px solid #647e75; background:white; text-decoration:none; font-weight:700 }
-    nav a:first-child { background:#a32c48; border-color:#a32c48; color:white }
-    a:focus-visible { outline:3px solid #194e70; outline-offset:3px }
-    #app { position:fixed; inset-inline:0; top:var(--screen-top,0px); height:var(--screen-height,100dvh); background:#fff }
-    iframe { width:100%; height:100%; display:block; border:0 }
+    :root { --teal:#7fc1bb; --amber:rgba(255,193,7,.9); --rose:#f43f5e; --ink:#164e55; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:var(--teal); color:var(--ink); font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
+    [hidden] { display:none !important; }
+    header { position:sticky; top:0; z-index:2; display:flex; justify-content:space-between; align-items:center; gap:16px; padding:clamp(12px,3vw,20px); background:var(--amber); box-shadow:0 2px 8px #0002; }
+    .logo { display:block; width:clamp(56px,14vw,120px); height:auto; border-radius:10px; box-shadow:0 6px 16px #0002; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; padding:14px 18px; border:0; border-radius:12px; background:var(--rose); color:white; font:inherit; font-weight:700; letter-spacing:.2px; text-decoration:none; cursor:pointer; box-shadow:0 6px 18px #f43f5e40; }
+    .btn:hover { background:#e11d48; }
+    :is(a,summary):focus-visible { outline:3px solid var(--ink); outline-offset:4px; }
+    .course-menu { position:relative; }
+    summary { list-style:none; }
+    summary::-webkit-details-marker { display:none; }
+    summary::after { content:""; width:9px; height:9px; margin:-4px 1px 0 10px; border-right:2px solid; border-bottom:2px solid; transform:rotate(45deg); }
+    details[open] summary::after { transform:rotate(225deg); margin-top:4px; }
+    .courses { position:absolute; right:0; top:calc(100% + 8px); width:min(260px,85vw); padding:8px; color:white; background:var(--rose); border-radius:12px; box-shadow:0 12px 24px #0003; }
+    .courses a { display:block; padding:10px 12px; color:inherit; text-decoration:none; border-radius:8px; }
+    .courses a:hover { background:#0002; }
+    main { display:grid; justify-items:center; align-content:start; gap:20px; padding:clamp(16px,4vw,32px); }
+    .launch { width:min(100%,440px); min-height:58px; }
+    .cover { margin:0; position:relative; width:min(100%,800px); overflow:hidden; background:#fffaf1; border-radius:20px; box-shadow:0 6px 18px #0003; }
+    .cover img { display:block; width:100%; height:auto; }
+    .cover figcaption { position:absolute; inset:63% 3% 3%; display:grid; align-content:center; gap:2px; text-align:center; }
+    .cover h1,.cover p { margin:0; line-height:1.12; font-weight:800; }
+    .cover h1 { font-size:clamp(2rem,7.7vw,4.2rem); color:#be003a; }
+    .cover p { font-size:clamp(.95rem,3.9vw,2.1rem); color:#00515c; }
+    .cover .subjects { margin-top:.3em; font-size:clamp(.81rem,2.6vw,1.3rem); }
+    #app { position:fixed; inset-inline:0; top:var(--screen-top,0px); height:var(--screen-height,100dvh); background:white; }
+    iframe { display:block; width:100%; height:100%; border:0; }
   </style>
 </head>
 <body>
-  <header><a href="/"><img src="/FB%20logo.png" alt="">ΑΟΘ4U</a></header>
-  <main id="entry">
-    <h1>ΑΟΘ4U · Πανελλήνιες</h1>
-    <p>Εξασκήσου σε θέματα Πανελληνίων, συμπλήρωσε τα κενά της θεωρίας και δες την πρόοδό σου.</p>
-    <nav aria-label="Λογαριασμός μαθητή">
-      <a href="https://aoth4u-panellinies.chrimpen0.chatgpt.site/?mode=signup" id="signup">Εγγραφή</a>
-      <a href="https://aoth4u-panellinies.chrimpen0.chatgpt.site/" id="signin">Σύνδεση</a>
+  <header>
+    <a href="/" aria-label="Αρχική σελίδα aoth4U"><img class="logo" src="/FB%20logo.png" alt=""></a>
+    <nav aria-label="Γρήγορη πλοήγηση">
+      <details class="course-menu">
+        <summary class="btn">Μάθημα</summary>
+        <div class="courses">
+          <a href="/">Α.Ο.Θ.</a>
+          <a href="/aod">Α.Ο.Δ.</a>
+          <a href="/sge">Σ.Γ.Ε.</a>
+          <a href="/asep">ΑΣΕΠ4U</a>
+        </div>
+      </details>
     </nav>
+  </header>
+  <main id="entry">
+    <a class="btn launch" id="launch" href="?action=signin">Άνοιγμα Εφαρμογής</a>
+    <figure class="cover">
+      <img src="./aoth4u-cover.webp" width="1536" height="1024" alt="Η μπλε σταγόνα με το σχολικό βιβλίο Οικονομίας" fetchpriority="high">
+      <figcaption>
+        <h1>ΑΟΘ4U</h1>
+        <p>Προετοιμασία για τις Πανελλήνιες</p>
+        <p class="subjects">ΑΟΘ · ΑΟΔ · ΣΓΕ</p>
+      </figcaption>
+    </figure>
+    <noscript><a href="https://aoth4u-panellinies.chrimpen0.chatgpt.site/">Άνοιγμα εφαρμογής σε νέο παράθυρο</a></noscript>
   </main>
   <section id="app" aria-label="ΑΟΘ4U · Πανελλήνιες" hidden>
     <iframe title="Εφαρμογή ΑΟΘ4U · Πανελλήνιες" referrerpolicy="no-referrer"></iframe>
@@ -76,14 +110,22 @@
         showApp(target);
       } else showEntry();
     }
-    for (const action of ['signup','signin']) {
-      document.getElementById(action).addEventListener('click', event => {
-        if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
-        event.preventDefault();
-        history.pushState(null,'',location.pathname + '?action=' + action);
-        route();
-      });
-    }
+    document.getElementById('launch').addEventListener('click', event => {
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+      event.preventDefault();
+      history.pushState(null, '', event.currentTarget.href);
+      route();
+    });
+    const menu = document.querySelector('.course-menu');
+    document.addEventListener('click', event => {
+      if (!menu.contains(event.target)) menu.open = false;
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && menu.open) {
+        menu.open = false;
+        menu.querySelector('summary').focus();
+      }
+    });
     viewport?.addEventListener('resize',fitScreen);
     viewport?.addEventListener('scroll',fitScreen);
     window.addEventListener('resize',fitScreen);
